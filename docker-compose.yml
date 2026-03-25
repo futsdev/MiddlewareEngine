@@ -1,0 +1,50 @@
+version: '3.9'
+
+services:
+
+  mongodb:
+    image: mongo:7.0
+    container_name: middlewareengine-mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: MiddlewareEngineDB
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - middlewarenet
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  middlewareengine:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: middlewareengine-app
+    restart: unless-stopped
+    ports:
+      - "9091:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:8080
+      MongoDbSettings__ConnectionString: mongodb://mongodb:27017
+      MongoDbSettings__DatabaseName: MiddlewareEngineDB
+      MongoDbSettings__FunctionDefinitionsCollectionName: FunctionDefinitions
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - middlewarenet
+
+volumes:
+  mongo_data:
+    driver: local
+
+networks:
+  middlewarenet:
+    driver: bridge
