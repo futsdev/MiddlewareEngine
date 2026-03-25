@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>MongoDB Connection Status</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            max-width: 600px;
+            width: 100%;
+        }
+
+        .status-icon {
+            font-size: 64px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .success { color: #28a745; }
+        .error { color: #dc3545; }
+        .loading { color: #667eea; }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .info-box {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .label {
+            font-weight: bold;
+            color: #666;
+        }
+
+        .value {
+            color: #333;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #dc3545;
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #28a745;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .collections-list {
+            list-style: none;
+            padding: 0;
+            margin: 10px 0;
+        }
+
+        .collections-list li {
+            padding: 8px;
+            background: white;
+            margin: 5px 0;
+            border-radius: 5px;
+            border-left: 3px solid #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="loadingStatus" class="status-icon loading">
+            <i class="fas fa-spinner fa-spin"></i>
+        </div>
+        <h1 id="statusTitle">Checking MongoDB Connection...</h1>
+        
+        <div id="statusContent"></div>
+
+        <div class="actions">
+            <button class="btn" onclick="checkConnection()">
+                <i class="fas fa-sync-alt"></i> Refresh
+            </button>
+            <a href="/" class="btn btn-secondary">
+                <i class="fas fa-home"></i> Go to Home
+            </a>
+        </div>
+    </div>
+
+    <script>
+        async function checkConnection() {
+            document.getElementById('statusTitle').textContent = 'Checking MongoDB Connection...';
+            document.getElementById('loadingStatus').innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            document.getElementById('loadingStatus').className = 'status-icon loading';
+
+            try {
+                const response = await fetch('/api/health/mongodb');
+                const data = await response.json();
+
+                if (response.ok && data.status === 'Connected') {
+                    showSuccess(data);
+                } else {
+                    showError(data);
+                }
+            } catch (error) {
+                showError({ error: error.message, message: 'Failed to connect to API' });
+            }
+        }
+
+        function showSuccess(data) {
+            document.getElementById('loadingStatus').innerHTML = '<i class="fas fa-check-circle"></i>';
+            document.getElementById('loadingStatus').className = 'status-icon success';
+            document.getElementById('statusTitle').textContent = 'MongoDB Connected!';
+
+            const content = `
+                <div class="success-message">
+                    <strong>✓ Connection Successful</strong><br>
+                    ${data.message || 'Database is ready'}
+                </div>
+
+                <div class="info-box">
+                    <div class="info-row">
+                        <span class="label">Status:</span>
+                        <span class="value">${data.status}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">Database:</span>
+                        <span class="value">${data.database}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">Connection:</span>
+                        <span class="value">${data.connectionString}</span>
+                    </div>
+                    ${data.collections && data.collections.length > 0 ? `
+                    <div class="info-row">
+                        <span class="label">Collections:</span>
+                        <span class="value">${data.collections.length}</span>
+                    </div>
+                    ` : ''}
+                </div>
+
+                ${data.collections && data.collections.length > 0 ? `
+                <div>
+                    <strong>Collections:</strong>
+                    <ul class="collections-list">
+                        ${data.collections.map(c => `<li><i class="fas fa-database"></i> ${c}</li>`).join('')}
+                    </ul>
+                </div>
+                ` : ''}
+            `;
+
+            document.getElementById('statusContent').innerHTML = content;
+        }
+
+        function showError(data) {
+            document.getElementById('loadingStatus').innerHTML = '<i class="fas fa-times-circle"></i>';
+            document.getElementById('loadingStatus').className = 'status-icon error';
+            document.getElementById('statusTitle').textContent = 'MongoDB Not Connected';
+
+            const content = `
+                <div class="error-message">
+                    <strong>✗ Connection Failed</strong><br>
+                    ${data.message || 'Cannot connect to MongoDB'}
+                    ${data.error ? `<br><br><strong>Error:</strong> ${data.error}` : ''}
+                </div>
+
+                <div class="info-box">
+                    <div class="info-row">
+                        <span class="label">Status:</span>
+                        <span class="value">${data.status || 'Disconnected'}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">Database:</span>
+                        <span class="value">${data.database || 'N/A'}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">Connection:</span>
+                        <span class="value">${data.connectionString || 'Not configured'}</span>
+                    </div>
+                </div>
+
+                <div class="error-message">
+                    <strong>How to fix:</strong><br>
+                    1. Install MongoDB locally or use MongoDB Atlas (cloud)<br>
+                    2. Update connection string in appsettings.json<br>
+                    3. Ensure MongoDB service is running<br>
+                    4. Check firewall settings<br>
+                    <br>
+                    <strong>See <a href="/MONGODB_SETUP.md" style="color: #721c24; text-decoration: underline;">MONGODB_SETUP.md</a> for detailed instructions</strong>
+                </div>
+            `;
+
+            document.getElementById('statusContent').innerHTML = content;
+        }
+
+        // Auto-check on load
+        checkConnection();
+    </script>
+</body>
+</html>

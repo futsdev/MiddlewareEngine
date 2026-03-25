@@ -1,0 +1,146 @@
+[
+  {
+    "Name": "Simple API Health Check Test",
+    "Description": "Basic test to verify API health and connectivity",
+    "Tags": ["smoke", "api", "health"],
+    "Priority": "High",
+    "Status": "Active",
+    "SetupOperations": [],
+    "Steps": [
+      {
+        "Name": "Health Check",
+        "Description": "Verify API is responsive",
+        "Order": 1,
+        "ContinueOnFailure": false,
+        "Actions": [
+          {
+            "Name": "Call Health Endpoint",
+            "Description": "GET request to health endpoint",
+            "Order": 1,
+            "DelayBeforeMs": 0,
+            "DelayAfterMs": 0,
+            "ContinueOnFailure": false,
+            "PreConditions": [],
+            "Operations": [
+              {
+                "Name": "GET /api/functions",
+                "Description": "Call functions list API",
+                "OperationType": "RestApi",
+                "OperationDetails": {
+                  "url": "http://localhost:5277/api/functions",
+                  "method": "GET"
+                },
+                "Parameters": {},
+                "ExpectedResult": null,
+                "TimeoutSeconds": 10,
+                "ContinueOnFailure": false,
+                "Order": 1
+              }
+            ],
+            "PostConditions": []
+          }
+        ]
+      }
+    ],
+    "TeardownOperations": []
+  },
+  {
+    "Name": "Multi-Step Test Example",
+    "Description": "Example test with multiple steps, actions, and operations",
+    "Tags": ["example", "multi-step"],
+    "Priority": "Medium",
+    "Status": "Active",
+    "SetupOperations": [],
+    "Steps": [
+      {
+        "Name": "Step 1 - Initialization",
+        "Description": "Initialize test environment",
+        "Order": 1,
+        "ContinueOnFailure": false,
+        "Actions": [
+          {
+            "Name": "Action 1.1 - Setup",
+            "Description": "First action in step 1",
+            "Order": 1,
+            "DelayBeforeMs": 0,
+            "DelayAfterMs": 500,
+            "ContinueOnFailure": false,
+            "PreConditions": [],
+            "Operations": [
+              {
+                "Name": "Operation 1.1.1",
+                "Description": "First operation",
+                "OperationType": "RestApi",
+                "OperationDetails": {
+                  "url": "http://localhost:5277/api/functions",
+                  "method": "GET"
+                },
+                "Parameters": {},
+                "TimeoutSeconds": 10,
+                "Order": 1
+              }
+            ],
+            "PostConditions": []
+          },
+          {
+            "Name": "Action 1.2 - Validation",
+            "Description": "Second action in step 1",
+            "Order": 2,
+            "DelayBeforeMs": 0,
+            "DelayAfterMs": 0,
+            "ContinueOnFailure": false,
+            "PreConditions": [],
+            "Operations": [
+              {
+                "Name": "Operation 1.2.1",
+                "Description": "Validation operation",
+                "OperationType": "RestApi",
+                "OperationDetails": {
+                  "url": "http://localhost:5277/swagger/index.html",
+                  "method": "GET"
+                },
+                "Parameters": {},
+                "TimeoutSeconds": 10,
+                "Order": 1
+              }
+            ],
+            "PostConditions": []
+          }
+        ]
+      },
+      {
+        "Name": "Step 2 - Execution",
+        "Description": "Execute main test logic",
+        "Order": 2,
+        "ContinueOnFailure": false,
+        "Actions": [
+          {
+            "Name": "Action 2.1 - Main Operation",
+            "Description": "Main test operation",
+            "Order": 1,
+            "DelayBeforeMs": 1000,
+            "DelayAfterMs": 0,
+            "ContinueOnFailure": false,
+            "PreConditions": [],
+            "Operations": [
+              {
+                "Name": "Operation 2.1.1",
+                "Description": "Primary operation",
+                "OperationType": "RestApi",
+                "OperationDetails": {
+                  "url": "http://localhost:5277/api/functions",
+                  "method": "GET"
+                },
+                "Parameters": {},
+                "TimeoutSeconds": 15,
+                "Order": 1
+              }
+            ],
+            "PostConditions": []
+          }
+        ]
+      }
+    ],
+    "TeardownOperations": []
+  }
+]

@@ -1,0 +1,627 @@
+@page
+@model MiddlewareEngine.Pages.Setups.IndexModel
+@{
+    ViewData["Title"] = "Setups Management";
+}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+<nav aria-label="breadcrumb" style="margin-bottom:1rem;">
+    <ol class="breadcrumb" style="background:#f8fafc;padding:0.75rem 1rem;border-radius:8px;margin:0;">
+        <li class="breadcrumb-item"><a href="/" style="color:#3b82f6;text-decoration:none;"><i class="bi bi-house-door"></i> Home</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Setups</li>
+    </ol>
+</nav>
+
+<style>
+    :root {
+        --primary: #3b82f6;
+        --success: #10b981;
+        --warning: #f59e0b;
+        --danger: #ef4444;
+        --info: #06b6d4;
+        --purple: #8b5cf6;
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, var(--purple), #7c3aed);
+        color: white;
+        padding: 1rem 1.25rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .page-header h1 {
+        margin: 0;
+        font-size: 1.25rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .filters-card {
+        background: white;
+        padding: 1rem;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        margin-bottom: 1rem;
+        border: 1px solid #e2e8f0;
+    }
+
+    .filters-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 0.75rem;
+    }
+
+    .filter-group label {
+        font-weight: 600;
+        color: #0f172a;
+        margin-bottom: 0.375rem;
+        font-size: 0.75rem;
+        display: block;
+    }
+
+    .filter-group input,
+    .filter-group select {
+        width: 100%;
+        padding: 0.5rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        font-size: 0.8125rem;
+    }
+
+    .setups-grid {
+        display: grid;
+        gap: 0.75rem;
+    }
+
+    .setup-card {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        border: 1px solid #e2e8f0;
+        border-left: 3px solid var(--purple);
+        transition: all 0.2s;
+    }
+
+    .setup-card:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        transform: translateY(-1px);
+    }
+
+    .card-header {
+        padding: 0.875rem 1rem;
+        border-bottom: 1px solid #e2e8f0;
+        background: #fafafa;
+        display: flex;
+        justify-content: space-between;
+        align-items: start;
+    }
+
+    .card-title h3 {
+        margin: 0 0 0.25rem 0;
+        font-size: 0.9375rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 0.375rem;
+    }
+
+    .card-title .meta {
+        color: #64748b;
+        font-size: 0.8125rem;
+    }
+
+    .card-badges {
+        display: flex;
+        gap: 0.375rem;
+        flex-wrap: wrap;
+    }
+
+    .badge {
+        padding: 0.2rem 0.625rem;
+        border-radius: 10px;
+        font-size: 0.6875rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .badge-active {
+        background: #d1fae5;
+        color: #065f46;
+    }
+
+    .badge-inactive {
+        background: #e5e7eb;
+        color: #374151;
+    }
+
+    .badge-maintenance {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .card-body {
+        padding: 0.875rem 1rem;
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.625rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .info-item {
+        padding: 0.5rem;
+        background: #f8fafc;
+        border-radius: 6px;
+        font-size: 0.75rem;
+    }
+
+    .info-label {
+        color: #64748b;
+        font-weight: 600;
+        text-transform: uppercase;
+        margin-bottom: 0.25rem;
+    }
+
+    .info-value {
+        color: #0f172a;
+        font-weight: 500;
+    }
+
+    .resources-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.625rem;
+    }
+
+    .resource-box {
+        background: #f5f3ff;
+        border: 1px solid #ddd6fe;
+        border-radius: 6px;
+        padding: 0.625rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .resource-box:hover {
+        background: #ede9fe;
+        border-color: var(--purple);
+    }
+
+    .resource-box i {
+        font-size: 1.125rem;
+        color: var(--purple);
+        margin-bottom: 0.25rem;
+    }
+
+    .resource-value {
+        font-size: 1.125rem;
+        font-weight: 700;
+        color: #0f172a;
+    }
+
+    .resource-label {
+        font-size: 0.6875rem;
+        color: #64748b;
+        text-transform: uppercase;
+    }
+
+    .card-footer {
+        padding: 0.625rem 1rem;
+        background: #fafafa;
+        border-top: 1px solid #e2e8f0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .btn {
+        padding: 0.375rem 0.75rem;
+        border: none;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 0.75rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .btn-primary {
+        background: white;
+        color: var(--primary);
+    }
+
+    .btn-success {
+        background: var(--success);
+        color: white;
+    }
+
+    .btn-warning {
+        background: var(--warning);
+        color: white;
+    }
+
+    .btn-danger {
+        background: var(--danger);
+        color: white;
+    }
+
+    .btn-info {
+        background: var(--info);
+        color: white;
+    }
+
+    .details-section {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease;
+    }
+
+    .details-section.expanded {
+        max-height: 2000px;
+        overflow: visible;
+    }
+
+    .relationships {
+        padding: 1rem;
+        background: white;
+        border-top: 1px solid #e2e8f0;
+    }
+
+    .relationship-grid {
+        display: grid;
+        gap: 0.75rem;
+    }
+
+    .relationship-item {
+        padding: 0.625rem;
+        background: #f8fafc;
+        border-left: 3px solid var(--info);
+        border-radius: 4px;
+        font-size: 0.8125rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .relationship-item.instrument {
+        border-left-color: var(--warning);
+        background: #fffbeb;
+    }
+</style>
+
+<div class="page-header">
+    <h1><i class="bi bi-diagram-3"></i> Setups Management</h1>
+    <a href="/Setups/Create" class="btn btn-primary"><i class="bi bi-plus"></i> Create Setup</a>
+</div>
+
+<div class="filters-card">
+    <div class="filters-grid">
+        <div class="filter-group">
+            <label><i class="bi bi-search"></i> Search</label>
+            <input type="text" id="searchFilter" placeholder="Search setups..." onkeyup="applyFilters()" />
+        </div>
+        <div class="filter-group">
+            <label><i class="bi bi-diagram-2"></i> Type</label>
+            <select id="typeFilter" onchange="applyFilters()">
+                <option value="">All Types</option>
+                <option value="Production">Production</option>
+                <option value="Testing">Testing</option>
+                <option value="Development">Development</option>
+                <option value="Research">Research</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label><i class="bi bi-circle"></i> Status</label>
+            <select id="statusFilter" onchange="applyFilters()">
+                <option value="">All Status</option>
+                <option value="Active">Active</option>
+                <option value="Inactive">Inactive</option>
+                <option value="Maintenance">Maintenance</option>
+            </select>
+        </div>
+    </div>
+</div>
+
+<div id="setupsContainer" class="setups-grid">
+    <div style="text-align: center; padding: 2rem; color: #64748b;">
+        <i class="fas fa-spinner fa-spin" style="font-size: 2rem;"></i>
+        <p>Loading setups...</p>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    let allSetups = [], filteredSetups = [], allProjects = [], allInstruments = [];
+    let currentPage = 1, pageSize = 10;
+
+    document.addEventListener('DOMContentLoaded', async function () {
+        await Promise.all([loadSetups(), loadProjects(), loadInstruments()]);
+        applyFilters();
+    });
+
+    async function loadSetups() {
+        try {
+            const res = await fetch('/api/setups');
+            if (res.ok) allSetups = await res.json();
+        } catch (error) {
+            console.error('Error loading setups:', error);
+        }
+    }
+
+    async function loadProjects() {
+        try {
+            const res = await fetch('/api/projects');
+            if (res.ok) allProjects = await res.json();
+        } catch (error) {
+            console.error('Error loading projects:', error);
+        }
+    }
+
+    async function loadInstruments() {
+        try {
+            const res = await fetch('/api/instruments');
+            if (res.ok) allInstruments = await res.json();
+        } catch (error) {
+            console.error('Error loading instruments:', error);
+        }
+    }
+
+    function applyFilters() {
+        const search = document.getElementById('searchFilter').value.toLowerCase();
+        const type = document.getElementById('typeFilter').value;
+        const status = document.getElementById('statusFilter').value;
+
+        filteredSetups = allSetups.filter(setup => {
+            return (!search || (setup.name || '').toLowerCase().includes(search)) &&
+                (!type || setup.type === type) &&
+                (!status || setup.status === status);
+        });
+
+        currentPage = 1;
+        renderSetups();
+    }
+
+    function renderSetups() {
+        const container = document.getElementById('setupsContainer');
+        
+        if (!filteredSetups.length) {
+            container.innerHTML = '<div style="text-align:center;padding:2rem;color:#64748b;"><i class="fas fa-inbox" style="font-size:3rem;margin-bottom:1rem;"></i><p>No setups found</p></div>';
+            return;
+        }
+
+        const start = (currentPage - 1) * pageSize;
+        const paginated = filteredSetups.slice(start, start + pageSize);
+
+        let html = '';
+        paginated.forEach(setup => {
+            const statusClass = 'badge-' + (setup.status || 'active').toLowerCase();
+            
+            // Get detailed instrument and project mapping
+            const assignedInstruments = (setup.instrumentIds || []).map(iid => {
+                const inst = allInstruments.find(i => i.id === iid);
+                return inst ? { name: inst.name, type: inst.type, status: inst.status } : null;
+            }).filter(i => i);
+            
+            const assignedProjects = allProjects.filter(p => (p.setupIds || []).includes(setup.id));
+            const assignedProjectDetails = assignedProjects.map(proj => {
+                const daysLeft = proj.endDate ? Math.ceil((new Date(proj.endDate) - new Date()) / (1000*60*60*24)) : null;
+                return { name: proj.name, customer: proj.customerName, daysLeft: daysLeft };
+            });
+            
+            const projectCount = assignedProjects.length;
+            const instrumentCount = assignedInstruments.length;
+            
+            let mappingInfo = '';
+            if (assignedInstruments.length > 0 || assignedProjects.length > 0) {
+                mappingInfo = '<div style="border-top:1px solid #e2e8f0;padding-top:0.75rem;margin-top:0.75rem;">';
+                mappingInfo += '<div style="font-size:0.75rem;font-weight:600;color:#475569;margin-bottom:0.5rem;"><i class="bi bi-diagram-2"></i> Resources & Projects:</div>';
+                
+                if (assignedInstruments.length > 0) {
+                    mappingInfo += '<div style="font-size:0.75rem;color:#64748b;margin-left:0.5rem;margin-bottom:0.5rem;">';
+                    mappingInfo += '<div style="font-weight:600;color:#475569;"><i class="bi bi-hdd-rack"></i> Instruments (' + assignedInstruments.length + '):</div>';
+                    assignedInstruments.forEach((inst, idx) => {
+                        if (idx < 3) {
+                            const statusColor = inst.status === 'Available' ? '#10b981' : '#f59e0b';
+                            mappingInfo += '<div style="margin-left:1rem;color:#64748b;">• ' + inst.name + ' <span style="color:' + statusColor + ';font-weight:600;">(' + (inst.status || 'N/A') + ')</span></div>';
+                        }
+                    });
+                    if (assignedInstruments.length > 3) {
+                        mappingInfo += '<div style="margin-left:1rem;color:#94a3b8;font-size:0.7rem;">+' + (assignedInstruments.length - 3) + ' more...</div>';
+                    }
+                    mappingInfo += '</div>';
+                }
+                
+                if (assignedProjectDetails.length > 0) {
+                    mappingInfo += '<div style="font-size:0.75rem;color:#64748b;margin-left:0.5rem;">';
+                    mappingInfo += '<div style="font-weight:600;color:#475569;"><i class="bi bi-folder"></i> Projects (' + assignedProjectDetails.length + '):</div>';
+                    assignedProjectDetails.forEach((proj, idx) => {
+                        if (idx < 2) {
+                            mappingInfo += '<div style="margin-left:1rem;color:#64748b;">• ' + proj.name;
+                            if (proj.customer) mappingInfo += ' <span style="color:#94a3b8;">(' + proj.customer + ')</span>';
+                            if (proj.daysLeft !== null) {
+                                if (proj.daysLeft > 0) mappingInfo += ' <span style="color:#10b981;">- ' + proj.daysLeft + 'd left</span>';
+                                else if (proj.daysLeft < 0) mappingInfo += ' <span style="color:#ef4444;">- overdue</span>';
+                            }
+                            mappingInfo += '</div>';
+                        }
+                    });
+                    if (assignedProjectDetails.length > 2) {
+                        mappingInfo += '<div style="margin-left:1rem;color:#94a3b8;font-size:0.7rem;">+' + (assignedProjectDetails.length - 2) + ' more...</div>';
+                    }
+                    mappingInfo += '</div>';
+                }
+                
+                mappingInfo += '</div>';
+            }
+
+            html += '<div class="setup-card">' +
+                    '<div class="card-header">' +
+                        '<div class="card-title">' +
+                            '<h3><i class="bi bi-diagram-3"></i> ' + (setup.name || 'Unnamed Setup') + '</h3>' +
+                            '<div class="meta">' + (setup.type || 'N/A') + ' Setup</div>' +
+                        '</div>' +
+                        '<div class="card-badges">' +
+                            '<span class="badge ' + statusClass + '">' + (setup.status || 'Active') + '</span>' +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="card-body">' +
+                        '<div class="info-grid">' +
+                            '<div class="info-item">' +
+                                '<div class="info-label">Type</div>' +
+                                '<div class="info-value">' + (setup.type || 'N/A') + '</div>' +
+                            '</div>' +
+                            '<div class="info-item">' +
+                                '<div class="info-label">Location</div>' +
+                                '<div class="info-value">' + (setup.location || 'N/A') + '</div>' +
+                            '</div>' +
+                        '</div>' +
+                        mappingInfo +
+                        '<div class="resources-grid" style="margin-top:0.75rem;">' +
+                            '<div class="resource-box">' +
+                                '<i class="bi bi-hdd-rack"></i>' +
+                                '<div class="resource-value">' + instrumentCount + '</div>' +
+                                '<div class="resource-label">Instruments</div>' +
+                            '</div>' +
+                            '<div class="resource-box">' +
+                                '<i class="bi bi-folder"></i>' +
+                                '<div class="resource-value">' + projectCount + '</div>' +
+                                '<div class="resource-label">Projects</div>' +
+                            '</div>' +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="details-section" id="details-' + setup.id + '"></div>' +
+                    '<div class="card-footer">' +
+                        '<div style="font-size:0.75rem;color:#64748b;">' +
+                            '<i class="bi bi-calendar"></i> ' + new Date(setup.createdAt).toLocaleDateString() +
+                        '</div>' +
+                        '<div style="display:flex;gap:0.375rem;">' +
+                            '<button class="btn btn-info" onclick="toggleDetails(\'' + setup.id + '\')"><i class="bi bi-eye"></i> View</button>' +
+                            '<button class="btn btn-primary" onclick="manageInstruments(\'' + setup.id + '\')"><i class="bi bi-gear"></i> Manage</button>' +
+                            '<button class="btn btn-success" onclick="editSetup(\'' + setup.id + '\')"><i class="bi bi-pencil"></i> Edit</button>' +
+                            '<button class="btn btn-danger" onclick="deleteSetup(\'' + setup.id + '\', \'' + (setup.name || '').replace(/'/g, "\\'") + '\')"><i class="bi bi-trash"></i> Delete</button>' +
+                        '</div>' +
+                    '</div>' +
+                '</div>';
+        });
+
+        container.innerHTML = html;
+    }
+
+    function toggleDetails(setupId) {
+        const details = document.getElementById('details-' + setupId);
+        if (details.classList.contains('expanded')) {
+            details.classList.remove('expanded');
+            details.innerHTML = '';
+        } else {
+            const setup = allSetups.find(s => s.id === setupId);
+            if (!setup) return;
+
+            const instrumentsHTML = (setup.instrumentIds || []).map(iid => {
+                const inst = allInstruments.find(i => i.id === iid);
+                if (!inst) return '';
+                return '<div class="relationship-item instrument" style="padding:0.75rem;">' +
+                    '<div><i class="bi bi-hdd-rack"></i> <strong>' + inst.name + '</strong> - ' + (inst.type || 'Instrument') + '</div>' +
+                    '<div style="margin-left:1.5rem;font-size:0.8rem;color:#64748b;margin-top:0.25rem;">' +
+                    'Status: <span style="color:' + (inst.status === 'Available' ? '#10b981' : '#f59e0b') + ';font-weight:600;">' + (inst.status || 'Available') + '</span>' +
+                    (inst.manufacturer ? ' | ' + inst.manufacturer : '') +
+                    (inst.location ? ' | Location: ' + inst.location : '') +
+                    '</div>' +
+                    '</div>';
+            }).filter(x => x).join('');
+
+            const projectsHTML = (setup.projectIds || []).map(pid => {
+                const proj = allProjects.find(p => p.id === pid);
+                if (!proj) return '';
+                
+                let timeline = '';
+                if (proj.startDate || proj.endDate) {
+                    timeline = '<div style="margin-left:1.5rem;font-size:0.75rem;color:#94a3b8;margin-top:0.25rem;"><i class="bi bi-calendar-range"></i> ';
+                    if (proj.startDate) timeline += new Date(proj.startDate).toLocaleDateString();
+                    if (proj.endDate) timeline += ' → ' + new Date(proj.endDate).toLocaleDateString();
+                    
+                    // Calculate if project is active
+                    const now = new Date();
+                    const end = proj.endDate ? new Date(proj.endDate) : null;
+                    if (end && end < now) {
+                        timeline += ' <span style="color:#ef4444;">(Completed)</span>';
+                    } else if (end) {
+                        const daysLeft = Math.ceil((end - now) / (1000 * 60 * 60 * 24));
+                        timeline += ' <span style="color:#10b981;">(' + daysLeft + ' days remaining)</span>';
+                    }
+                    timeline += '</div>';
+                }
+                
+                let customer = '';
+                if (proj.customerName) {
+                    customer = '<div style="margin-left:1.5rem;font-size:0.8rem;color:#64748b;margin-top:0.25rem;"><i class="bi bi-person-badge"></i> ' + proj.customerName;
+                    if (proj.customerCompany) customer += ' (' + proj.customerCompany + ')';
+                    customer += '</div>';
+                }
+                
+                return '<div class="relationship-item" style="padding:0.75rem;">' +
+                    '<div><i class="bi bi-folder"></i> <strong>' + proj.name + '</strong> - <span style="color:' + (proj.status === 'Active' ? '#10b981' : '#64748b') + ';">' + (proj.status || 'Active') + '</span></div>' +
+                    timeline + customer +
+                    '</div>';
+            }).filter(x => x).join('');
+
+            let content = '<div class="relationships">';
+            
+            if (instrumentsHTML) {
+                content += '<h4 style="font-size:0.875rem;margin:0 0 0.5rem 0;font-weight:600;color:#0f172a;"><i class="bi bi-hdd-rack"></i> Instruments in this Setup (' + (setup.instrumentIds || []).length + ')</h4><div class="relationship-grid">' + instrumentsHTML + '</div>';
+            }
+            
+            if (projectsHTML) {
+                content += '<h4 style="font-size:0.875rem;margin:1rem 0 0.5rem 0;font-weight:600;color:#0f172a;"><i class="bi bi-folder"></i> Assigned to Projects (' + (setup.projectIds || []).length + ')</h4><div class="relationship-grid">' + projectsHTML + '</div>';
+            }
+            
+            if (!instrumentsHTML && !projectsHTML) {
+                content += '<div style="text-align:center;color:#64748b;font-size:0.8125rem;padding:1rem;background:#f8fafc;border-radius:6px;"><i class="bi bi-info-circle"></i> No instruments or projects assigned to this setup</div>';
+            }
+            
+            content += '</div>';
+            
+            details.innerHTML = content;
+            details.classList.add('expanded');
+        }
+    }
+
+    function editSetup(id) {
+        window.location.href = '/Setups/Edit?id=' + id;
+    }
+
+    function manageInstruments(id) {
+        window.location.href = '/Setups/ManageInstruments?id=' + id;
+    }
+
+    async function deleteSetup(id, name) {
+        if (!confirm('Delete setup "' + name + '"?\n\nWarning: This will remove it from all projects.')) return;
+        
+        try {
+            const res = await fetch('/api/setups/' + id, { method: 'DELETE' });
+            if (res.ok) {
+                showToast('Setup deleted successfully', 'success');
+                await loadSetups();
+                applyFilters();
+            } else {
+                showToast('Failed to delete setup', 'error');
+            }
+        } catch (error) {
+            console.error('Error deleting setup:', error);
+            showToast('Error deleting setup', 'error');
+        }
+    }
+</script>
+}

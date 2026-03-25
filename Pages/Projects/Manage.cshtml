@@ -1,0 +1,262 @@
+@page "/projects/manage"
+@model MiddlewareEngine.Pages.Projects.ManageModel
+@{
+    ViewData["Title"] = "Manage Projects & Setups";
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>@ViewData["Title"]</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        body { background: #f8fafc; font-family: 'Segoe UI', sans-serif; }
+        .page-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 2rem; margin-bottom: 2rem; border-radius: 12px; }
+        .project-card { background: white; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.08); border: 2px solid #e2e8f0; transition: all 0.3s; }
+        .project-card:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.12); border-color: #667eea; }
+        .project-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 2px solid #e2e8f0; }
+        .project-name { font-size: 1.5rem; font-weight: 700; color: #1e293b; margin: 0; }
+        .setup-list { display: grid; gap: 0.75rem; margin-top: 1rem; }
+        .setup-item { padding: 1rem; background: #f8fafc; border-radius: 8px; border: 2px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; transition: all 0.2s; }
+        .setup-item:hover { background: #f1f5f9; }
+        .setup-item.assigned { background: #dcfce7; border-color: #10b981; }
+        .setup-item.assigned:hover { background: #bbf7d0; }
+        .setup-info { flex: 1; }
+        .setup-name { font-weight: 600; color: #1e293b; font-size: 1rem; }
+        .setup-meta { font-size: 0.875rem; color: #64748b; margin-top: 0.25rem; }
+        .btn-assign { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; padding: 0.5rem 1rem; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+        .btn-assign:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); }
+        .btn-unassign { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; border: none; padding: 0.5rem 1rem; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+        .btn-unassign:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3); }
+        .badge-count { background: #667eea; color: white; padding: 0.375rem 0.75rem; border-radius: 20px; font-size: 0.875rem; font-weight: 600; }
+        .search-box { margin-bottom: 1.5rem; }
+        .search-box input { padding: 0.75rem 1rem; border-radius: 10px; border: 2px solid #e2e8f0; width: 100%; font-size: 1rem; }
+        .search-box input:focus { outline: none; border-color: #667eea; box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1); }
+    </style>
+</head>
+<body>
+    <div class="container py-4">
+        <div class="page-header">
+            <h1 class="mb-2"><i class="bi bi-diagram-3"></i> Manage Projects & Setups</h1>
+            <p class="mb-0">Assign setups to projects to make them available in campaigns</p>
+        </div>
+
+        <div class="search-box">
+            <input type="text" id="searchBox" placeholder="🔍 Search projects or setups..." onkeyup="filterProjects()">
+        </div>
+
+        <div id="projectsList"></div>
+    </div>
+
+    <script>
+        let projects = [];
+        let setups = [];
+
+        async function loadData() {
+            try {
+                [projects, setups] = await Promise.all([
+                    fetch('/api/projects').then(r => r.json()),
+                    fetch('/api/setups').then(r => r.json())
+                ]);
+                renderProjects();
+            } catch (error) {
+                console.error('Error loading data:', error);
+                alert('Failed to load data');
+            }
+        }
+
+        function renderProjects() {
+            const container = document.getElementById('projectsList');
+            const searchTerm = document.getElementById('searchBox').value.toLowerCase();
+
+            const filteredProjects = projects.filter(p => 
+                (p.name || p.Name || '').toLowerCase().includes(searchTerm) ||
+                (p.description || p.Description || '').toLowerCase().includes(searchTerm)
+            );
+
+            if (filteredProjects.length === 0) {
+                container.innerHTML = '<div class="text-center text-muted py-5"><i class="bi bi-inbox" style="font-size:3rem;"></i><p class="mt-3">No projects found</p></div>';
+                return;
+            }
+
+            container.innerHTML = filteredProjects.map(project => {
+                const projectId = project.id || project.Id;
+                const projectName = project.name || project.Name;
+                const projectDesc = project.description || project.Description;
+
+                // Get setupIds from the project
+                const projectSetupIds = project.setup_ids || project.setupIds || project.SetupIds || [];
+
+                // Find setups assigned to this project
+                const assignedSetups = setups.filter(setup => {
+                    const setupId = setup.id || setup.Id;
+                    return projectSetupIds.includes(setupId);
+                });
+
+                // Find setups not assigned to this project
+                const unassignedSetups = setups.filter(setup => {
+                    const setupId = setup.id || setup.Id;
+                    return !projectSetupIds.includes(setupId);
+                });
+
+                return `
+                    <div class="project-card">
+                        <div class="project-header">
+                            <div>
+                                <h2 class="project-name"><i class="bi bi-folder2-open"></i> ${projectName}</h2>
+                                ${projectDesc ? `<p class="text-muted mb-0 mt-2">${projectDesc}</p>` : ''}
+                            </div>
+                            <span class="badge-count"><i class="bi bi-gear-fill"></i> ${assignedSetups.length} setups</span>
+                        </div>
+
+                        <div class="mt-3">
+                            <h5 style="color:#10b981;font-weight:700;margin-bottom:1rem;"><i class="bi bi-check-circle-fill"></i> Assigned Setups (${assignedSetups.length})</h5>
+                            <div class="setup-list">
+                                ${assignedSetups.length > 0 ? assignedSetups.map(setup => {
+                                    const setupId = setup.id || setup.Id;
+                                    const setupName = setup.name || setup.Name;
+                                    const setupType = setup.type || setup.Type || 'General';
+                                    const setupLocation = setup.location || setup.Location || 'Unknown';
+                                    const instrumentCount = (setup.instrumentIds || setup.InstrumentIds || []).length;
+                                    
+                                    return `
+                                        <div class="setup-item assigned">
+                                            <div class="setup-info">
+                                                <div class="setup-name"><i class="bi bi-gear-fill"></i> ${setupName}</div>
+                                                <div class="setup-meta">
+                                                    <i class="bi bi-tag"></i> ${setupType} | 
+                                                    <i class="bi bi-geo-alt"></i> ${setupLocation} | 
+                                                    <i class="bi bi-cpu"></i> ${instrumentCount} instruments
+                                                </div>
+                                            </div>
+                                            <button class="btn-unassign" onclick="unassignSetup('${projectId}', '${setupId}')">
+                                                <i class="bi bi-x-circle"></i> Remove
+                                            </button>
+                                        </div>
+                                    `;
+                                }).join('') : '<p class="text-muted">No setups assigned to this project</p>'}
+                            </div>
+                        </div>
+
+                        <div class="mt-4">
+                            <h5 style="color:#64748b;font-weight:700;margin-bottom:1rem;"><i class="bi bi-plus-circle"></i> Available Setups (${unassignedSetups.length})</h5>
+                            <div class="setup-list">
+                                ${unassignedSetups.length > 0 ? unassignedSetups.map(setup => {
+                                    const setupId = setup.id || setup.Id;
+                                    const setupName = setup.name || setup.Name;
+                                    const setupType = setup.type || setup.Type || 'General';
+                                    const setupLocation = setup.location || setup.Location || 'Unknown';
+                                    const instrumentCount = (setup.instrumentIds || setup.InstrumentIds || []).length;
+                                    
+                                    return `
+                                        <div class="setup-item">
+                                            <div class="setup-info">
+                                                <div class="setup-name"><i class="bi bi-gear"></i> ${setupName}</div>
+                                                <div class="setup-meta">
+                                                    <i class="bi bi-tag"></i> ${setupType} | 
+                                                    <i class="bi bi-geo-alt"></i> ${setupLocation} | 
+                                                    <i class="bi bi-cpu"></i> ${instrumentCount} instruments
+                                                </div>
+                                            </div>
+                                            <button class="btn-assign" onclick="assignSetup('${projectId}', '${setupId}')">
+                                                <i class="bi bi-plus-circle"></i> Assign
+                                            </button>
+                                        </div>
+                                    `;
+                                }).join('') : '<p class="text-muted">All setups are already assigned to this project</p>'}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function assignSetup(projectId, setupId) {
+            try {
+                const project = projects.find(p => (p.id || p.Id) === projectId);
+                const setupIds = project.setup_ids || project.setupIds || project.SetupIds || [];
+                
+                if (!setupIds.includes(setupId)) {
+                    setupIds.push(setupId);
+                }
+
+                project.setup_ids = setupIds;
+                project.setupIds = setupIds;
+                project.SetupIds = setupIds;
+
+                const response = await fetch(`/api/projects/${projectId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(project)
+                });
+
+                if (response.ok) {
+                    await loadData(); // Reload to refresh
+                    showToast('Setup assigned successfully!', 'success');
+                } else {
+                    showToast('Failed to assign setup', 'error');
+                }
+            } catch (error) {
+                console.error('Error assigning setup:', error);
+                showToast('Error assigning setup', 'error');
+            }
+        }
+
+        async function unassignSetup(projectId, setupId) {
+            if (!confirm('Are you sure you want to remove this setup from the project?')) return;
+
+            try {
+                const project = projects.find(p => (p.id || p.Id) === projectId);
+                const setupIds = project.setup_ids || project.setupIds || project.SetupIds || [];
+                
+                const index = setupIds.indexOf(setupId);
+                if (index > -1) {
+                    setupIds.splice(index, 1);
+                }
+
+                project.setup_ids = setupIds;
+                project.setupIds = setupIds;
+                project.SetupIds = setupIds;
+
+                const response = await fetch(`/api/projects/${projectId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(project)
+                });
+
+                if (response.ok) {
+                    await loadData(); // Reload to refresh
+                    showToast('Setup removed successfully!', 'success');
+                } else {
+                    showToast('Failed to remove setup', 'error');
+                }
+            } catch (error) {
+                console.error('Error removing setup:', error);
+                showToast('Error removing setup', 'error');
+            }
+        }
+
+        function filterProjects() {
+            renderProjects();
+        }
+
+        function showToast(message, type) {
+            const colors = {
+                success: '#10b981',
+                error: '#ef4444',
+                warning: '#f59e0b'
+            };
+
+            const toast = document.createElement('div');
+            toast.style.cssText = `position:fixed;top:20px;right:20px;background:${colors[type]};color:white;padding:1rem 1.5rem;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,0.2);z-index:10000;font-weight:600;animation:slideIn 0.3s;`;
+            toast.innerHTML = `<i class="bi bi-${type === 'success' ? 'check-circle' : type === 'error' ? 'x-circle' : 'exclamation-circle'}"></i> ${message}`;
+            
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        document.addEventListener('DOMContentLoaded', loadData);
+    </script>
+</body>
+</html>

@@ -1,0 +1,378 @@
+@page
+@model MiddlewareEngine.Pages.Projects.CreateModel
+@{
+    ViewData["Title"] = "Create Project";
+}
+
+<nav aria-label="breadcrumb" style="margin-bottom:1rem;">
+    <ol class="breadcrumb" style="background:#f8fafc;padding:0.75rem 1rem;border-radius:8px;margin:0;">
+        <li class="breadcrumb-item"><a href="/" style="color:#3b82f6;text-decoration:none;"><i class="bi bi-house-door"></i> Home</a></li>
+        <li class="breadcrumb-item"><a href="/Projects" style="color:#3b82f6;text-decoration:none;">Projects</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Create</li>
+    </ol>
+</nav>
+
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+    }
+    .form-container {
+        max-width: 100%;
+        margin: 0;
+        background: white;
+        padding: 2rem;
+    }
+    .page-header {
+        background: linear-gradient(135deg, #3b82f6, #6366f1);
+        color: white;
+        padding: 1rem 1.25rem;
+        border-radius: 8px;
+        margin-bottom: 2rem;
+    }
+    .page-header h1 {
+        margin: 0;
+        font-size: 1.5rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.25rem;
+        margin-bottom: 1.25rem;
+    }
+    .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+    .form-group.full-width {
+        grid-column: 1 / -1;
+    }
+    .form-group label {
+        font-weight: 600;
+        color: #0f172a;
+        margin-bottom: 0.5rem;
+        font-size: 0.875rem;
+    }
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        padding: 0.625rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        font-size: 0.875rem;
+    }
+    .form-group textarea {
+        resize: vertical;
+        min-height: 80px;
+    }
+    .btn {
+        padding: 0.625rem 1.25rem;
+        border: none;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 0.875rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .btn-primary {
+        background: #3b82f6;
+        color: white;
+    }
+    .btn-primary:hover {
+        background: #2563eb;
+    }
+    .btn-secondary {
+        background: #64748b;
+        color: white;
+    }
+    .btn-secondary:hover {
+        background: #475569;
+    }
+    .form-actions {
+        display: flex;
+        gap: 0.75rem;
+        justify-content: flex-end;
+        padding-top: 1.5rem;
+        border-top: 1px solid #e2e8f0;
+    }
+    .alert {
+        padding: 0.875rem;
+        border-radius: 6px;
+        margin-bottom: 1rem;
+        display: none;
+    }
+    .alert-success {
+        background: #d1fae5;
+        color: #065f46;
+        border: 1px solid #10b981;
+    }
+    .alert-error {
+        background: #fee2e2;
+        color: #991b1b;
+        border: 1px solid #ef4444;
+    }
+</style>
+
+<div class="form-container">
+    <div class="page-header">
+        <h1><i class="bi bi-folder-plus"></i> Create New Project</h1>
+    </div>
+
+    <div id="alert" class="alert"></div>
+
+    <form id="projectForm">
+        <div class="form-grid">
+            <div class="form-group full-width">
+                <label for="name"><i class="bi bi-tag"></i> Project Name *</label>
+                <input type="text" id="name" name="name" required placeholder="Enter project name" />
+            </div>
+
+            <div class="form-group full-width">
+                <label for="description"><i class="bi bi-text-paragraph"></i> Description</label>
+                <textarea id="description" name="description" placeholder="Project description"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="status"><i class="bi bi-circle"></i> Status</label>
+                <select id="status" name="status">
+                    <option value="Active">Active</option>
+                    <option value="Inactive">Inactive</option>
+                    <option value="Completed">Completed</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="priority"><i class="bi bi-flag"></i> Priority</label>
+                <select id="priority" name="priority">
+                    <option value="Low">Low</option>
+                    <option value="Medium" selected>Medium</option>
+                    <option value="High">High</option>
+                    <option value="Critical">Critical</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="startDate"><i class="bi bi-calendar-event"></i> Start Date</label>
+                <input type="date" id="startDate" name="startDate" />
+            </div>
+
+            <div class="form-group">
+                <label for="endDate"><i class="bi bi-calendar-check"></i> End Date</label>
+                <input type="date" id="endDate" name="endDate" />
+            </div>
+
+            <div class="form-group full-width">
+                <label for="tags"><i class="bi bi-tags"></i> Tags (comma-separated)</label>
+                <input type="text" id="tags" name="tags" placeholder="e.g., automation, testing, production" />
+            </div>
+
+            <div class="form-group full-width" style="border-top: 2px solid #e2e8f0; padding-top: 1.5rem; margin-top: 1rem;">
+                <h3 style="font-size: 1rem; color: #0f172a; margin-bottom: 1rem;">
+                    <i class="bi bi-person-badge"></i> Customer/Client Information
+                </h3>
+            </div>
+
+            <div class="form-group">
+                <label for="customerName"><i class="bi bi-person"></i> Customer Name</label>
+                <input type="text" id="customerName" name="customerName" placeholder="Customer full name" />
+            </div>
+
+            <div class="form-group">
+                <label for="customerCompany"><i class="bi bi-building"></i> Company</label>
+                <input type="text" id="customerCompany" name="customerCompany" placeholder="Company name" />
+            </div>
+
+            <div class="form-group">
+                <label for="customerEmail"><i class="bi bi-envelope"></i> Email</label>
+                <input type="email" id="customerEmail" name="customerEmail" placeholder="customer@example.com" />
+            </div>
+
+            <div class="form-group">
+                <label for="customerPhone"><i class="bi bi-telephone"></i> Phone</label>
+                <input type="tel" id="customerPhone" name="customerPhone" placeholder="+1 (555) 123-4567" />
+            </div>
+
+            <div class="form-group full-width" style="border-top: 2px solid #e2e8f0; padding-top: 1.5rem; margin-top: 1rem;">
+                <h3 style="font-size: 1rem; color: #0f172a; margin-bottom: 1rem;">
+                    <i class="bi bi-diagram-3"></i> Assign Setups to Project
+                </h3>
+            </div>
+
+            <div class="form-group full-width">
+                <label for="setupIds"><i class="bi bi-diagram-3"></i> Select Setups</label>
+                <select id="setupIds" name="setupIds" multiple style="min-height: 120px;" onchange="showSetupAssignments()">
+                    <option value="" disabled>Loading setups...</option>
+                </select>
+                <small style="color: #64748b; font-size: 0.75rem;">Hold Ctrl (Cmd on Mac) to select multiple setups</small>
+                <div id="setupAssignmentInfo" style="margin-top: 0.75rem;"></div>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button type="button" class="btn btn-secondary" onclick="window.location.href='/Projects/Index'">
+                <i class="bi bi-x-circle"></i> Cancel
+            </button>
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-check-circle"></i> Create Project
+            </button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+<script>
+    let allSetups = [];
+    let allProjects = [];
+
+    document.addEventListener('DOMContentLoaded', async function() {
+        await loadSetups();
+    });
+
+    async function loadSetups() {
+        try {
+            const [setupsRes, projectsRes] = await Promise.all([
+                fetch('/api/setups'),
+                fetch('/api/projects')
+            ]);
+            
+            if (setupsRes.ok) {
+                allSetups = await setupsRes.json();
+                allProjects = projectsRes.ok ? await projectsRes.json() : [];
+                
+                const setupSelect = document.getElementById('setupIds');
+                setupSelect.innerHTML = allSetups.length ? 
+                    allSetups.map(s => '<option value="' + s.id + '">' + s.name + ' (' + (s.type || 'Setup') + ')</option>').join('') :
+                    '<option value="" disabled>No setups available</option>';
+            }
+        } catch (error) {
+            console.error('Error loading setups:', error);
+        }
+    }
+
+    function showSetupAssignments() {
+        const setupSelect = document.getElementById('setupIds');
+        const selectedIds = Array.from(setupSelect.selectedOptions).map(opt => opt.value);
+        const infoDiv = document.getElementById('setupAssignmentInfo');
+        
+        if (!selectedIds.length) {
+            infoDiv.innerHTML = '';
+            return;
+        }
+
+        let warnings = [];
+        selectedIds.forEach(setupId => {
+            const setup = allSetups.find(s => s.id === setupId);
+            if (setup) {
+                // Check if setup is assigned to other projects
+                const assignedProjects = allProjects.filter(p => (p.setupIds || []).includes(setupId));
+                
+                let details = '<div style="background:' + (assignedProjects.length > 0 ? '#fef3c7' : '#dbeafe') + ';border:1px solid ' + (assignedProjects.length > 0 ? '#f59e0b' : '#3b82f6') + ';padding:0.75rem;border-radius:6px;margin-bottom:0.75rem;">';
+                details += '<div style="font-weight:600;color:' + (assignedProjects.length > 0 ? '#92400e' : '#1e40af') + ';margin-bottom:0.5rem;">';
+                details += (assignedProjects.length > 0 ? '<i class="bi bi-exclamation-triangle"></i>' : '<i class="bi bi-info-circle"></i>') + ' Setup: ' + setup.name + ' (' + (setup.type || 'N/A') + ')</div>';
+                
+                // Show instruments in this setup
+                if (setup.instrumentIds && setup.instrumentIds.length > 0) {
+                    details += '<div style="margin-left:1rem;margin-bottom:0.5rem;">';
+                    details += '<div style="font-size:0.85rem;color:#475569;"><i class="bi bi-hdd-rack"></i> Contains ' + setup.instrumentIds.length + ' instrument(s):</div>';
+                    
+                    fetch('/api/instruments').then(r => r.json()).then(instruments => {
+                        const setupInstruments = instruments.filter(i => setup.instrumentIds.includes(i.id));
+                        let instList = '<div style="margin-left:1.5rem;font-size:0.8rem;color:#64748b;">';
+                        setupInstruments.forEach(inst => {
+                            instList += '• ' + inst.name + ' (' + (inst.type || 'N/A') + ')<br>';
+                        });
+                        instList += '</div>';
+                        const targetDiv = document.getElementById('setupAssignmentInfo').querySelector('[data-setup="' + setupId + '"] .instruments-list');
+                        if (targetDiv) targetDiv.innerHTML = instList;
+                    });
+                    
+                    details += '<div class="instruments-list"></div>';
+                    details += '</div>';
+                }
+                
+                // Show projects already using this setup
+                if (assignedProjects.length > 0) {
+                    details += '<div style="margin-left:1rem;margin-top:0.5rem;">';
+                    details += '<div style="font-size:0.85rem;color:#92400e;font-weight:600;"><i class="bi bi-exclamation-triangle"></i> Already assigned to:</div>';
+                    assignedProjects.forEach(proj => {
+                        details += '<div style="margin-left:1.5rem;margin-top:0.25rem;font-size:0.8rem;color:#78350f;">';
+                        details += '<i class="bi bi-folder"></i> ' + proj.name;
+                        if (proj.startDate || proj.endDate) {
+                            details += '<br><span style="margin-left:1rem;color:#a16207;">Duration: ';
+                            if (proj.startDate) details += new Date(proj.startDate).toLocaleDateString();
+                            if (proj.endDate) details += ' → ' + new Date(proj.endDate).toLocaleDateString();
+                            details += '</span>';
+                        }
+                        if (proj.customerName) {
+                            details += '<br><span style="margin-left:1rem;color:#a16207;">Customer: ' + proj.customerName + '</span>';
+                        }
+                        details += '</div>';
+                    });
+                    details += '</div>';
+                }
+                
+                details += '</div>';
+                warnings.push('<div data-setup="' + setupId + '">' + details + '</div>');
+            }
+        });
+
+        infoDiv.innerHTML = warnings.length > 0 ? warnings.join('') : '';
+    }
+
+    document.getElementById('projectForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const setupSelect = document.getElementById('setupIds');
+        const selectedSetups = Array.from(setupSelect.selectedOptions).map(opt => opt.value);
+
+        const formData = {
+            name: document.getElementById('name').value,
+            description: document.getElementById('description').value,
+            status: document.getElementById('status').value,
+            priority: document.getElementById('priority').value,
+            customerName: document.getElementById('customerName').value,
+            customerCompany: document.getElementById('customerCompany').value,
+            customerEmail: document.getElementById('customerEmail').value,
+            customerPhone: document.getElementById('customerPhone').value,
+            startDate: document.getElementById('startDate').value || null,
+            endDate: document.getElementById('endDate').value || null,
+            tags: document.getElementById('tags').value.split(',').map(t => t.trim()).filter(t => t),
+            setupIds: selectedSetups,
+            instrumentIds: [],
+            testCaseIds: []
+        };
+
+        try {
+            const response = await fetch('/api/projects', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            });
+
+            if (response.ok) {
+                showToast('Project created successfully!', 'success');
+                setTimeout(() => window.location.href = '/Projects/Index', 1500);
+            } else {
+                const error = await response.text();
+                showToast('Failed to create project: ' + error, 'error');
+            }
+        } catch (error) {
+            showToast('Error: ' + error.message, 'error');
+        }
+    });
+
+    function showAlert(message, type) {
+        const alert = document.getElementById('alert');
+        alert.textContent = message;
+        alert.className = `alert alert-${type}`;
+        alert.style.display = 'block';
+    }
+</script>
+}

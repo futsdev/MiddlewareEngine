@@ -1,0 +1,489 @@
+﻿<!DOCTYPE html>
+<html lang='en'>
+<head>
+    <meta charset='utf-8' />
+    <meta name='viewport' content='width=device-width, initial-scale=1.0' />
+    <title>@ViewData["Title"] - Automation Platform</title>
+    <link href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css' rel='stylesheet'>
+    <link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css'>
+    <link href='https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap' rel='stylesheet'>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: #f8fafc; }
+        .sidebar { position: fixed; left: 0; top: 0; width: 240px; height: 100vh; background: #1e293b; color: white; overflow-y: auto; overflow-x: hidden; z-index: 1000; box-shadow: 2px 0 10px rgba(0,0,0,0.1); }
+        .sidebar::-webkit-scrollbar { width: 6px; }
+        .sidebar::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
+        .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 3px; }
+        .sidebar::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.5); }
+        .brand { padding: 1rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.08); }
+        .brand-logo { display: flex; align-items: center; gap: 10px; color: white; text-decoration: none; font-size: 1.05rem; font-weight: 700; line-height: 1.2; }
+        .brand-logo i { font-size: 1.5rem; color: #3b82f6; flex-shrink: 0; }
+        .brand-subtitle { font-size: 0.625rem; color: rgba(255,255,255,0.5); margin-top: 0.125rem; text-transform: uppercase; letter-spacing: 0.5px; line-height: 1.2; }
+        .nav-section { padding: 0.875rem 0 0.375rem 0; }
+        .nav-section-title { padding: 0 1rem 0.5rem 1rem; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; color: rgba(255,255,255,0.35); letter-spacing: 1.2px; }
+        .nav-menu { list-style: none; padding: 0; margin: 0; }
+        .nav-link-main { display: flex; align-items: center; justify-content: space-between; padding: 0.6rem 1rem; color: rgba(255,255,255,0.8); text-decoration: none; transition: all 0.2s; cursor: pointer; font-weight: 500; font-size: 0.875rem; }
+        .nav-link-main:hover { background: rgba(255,255,255,0.05); color: white; }
+        .nav-link-main.active { background: linear-gradient(90deg, #3b82f6, #6366f1); color: white; box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3); }
+        .nav-link-main i:first-child { font-size: 1rem; width: 20px; margin-right: 10px; flex-shrink: 0; text-align: center; }
+        .nav-link-content { display: flex; align-items: center; flex: 1; min-width: 0; }
+        .nav-link-content span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .nav-chevron { font-size: 0.75rem; color: rgba(255,255,255,0.4); transition: transform 0.25s ease, color 0.25s ease; font-weight: 900; margin-left: 8px; flex-shrink: 0; }
+        .nav-item.expanded .nav-chevron { transform: rotate(90deg); color: #60a5fa; }
+        .submenu { list-style: none; max-height: 0; overflow: hidden; background: rgba(0,0,0,0.15); transition: max-height 0.3s ease; padding: 0; margin: 0; }
+        .nav-item.expanded .submenu { max-height: 600px; padding: 0.25rem 0; }
+        .submenu-link { display: flex; align-items: center; gap: 8px; padding: 0.5rem 1rem 0.5rem 2.75rem; color: rgba(255,255,255,0.65); text-decoration: none; font-size: 0.8125rem; transition: all 0.2s; position: relative; }
+        .submenu-link i { font-size: 0.8125rem; opacity: 0.6; flex-shrink: 0; width: 16px; text-align: center; }
+        .submenu-link:hover { background: rgba(255,255,255,0.08); color: white; padding-left: 3rem; }
+        .submenu-link:hover i { opacity: 1; }
+        .submenu-link.active { color: #60a5fa; background: rgba(59, 130, 246, 0.15); border-left: 3px solid #3b82f6; font-weight: 600; padding-left: 2.65rem; }
+        .submenu-link.active i { color: #60a5fa; opacity: 1; }
+        .main-wrapper { margin-left: 240px; min-height: 100vh; display: flex; flex-direction: column; }
+        .topbar { background: white; border-bottom: 1px solid #e2e8f0; padding: 0.75rem 1.25rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 999; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .topbar-left h1 { font-size: 1.25rem; font-weight: 700; color: #0f172a; margin: 0; }
+        .topbar-right { display: flex; align-items: center; gap: 1rem; }
+        .status-badge { display: flex; align-items: center; gap: 8px; padding: 0.5rem 1rem; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 20px; font-size: 0.875rem; color: #059669; font-weight: 600; }
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #10b981; animation: pulse 2s infinite; }
+        @@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .user-menu { display: flex; align-items: center; gap: 10px; padding: 0.5rem 1rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 25px; cursor: pointer; transition: all 0.3s; position: relative; }
+        .user-menu:hover { background: #e2e8f0; }
+        .user-avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #3b82f6, #6366f1); display: flex; align-items: center; justify-content: center; font-weight: 700; color: white; font-size: 0.875rem; }
+        .user-name { font-weight: 600; font-size: 0.875rem; color: #0f172a; }
+        .user-dropdown { position: absolute; top: 100%; right: 0; margin-top: 0.5rem; background: white; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.2); min-width: 200px; display: none; z-index: 1000; }
+        .user-menu.active .user-dropdown { display: block; }
+        .user-dropdown-item { padding: 0.75rem 1rem; display: flex; align-items: center; gap: 0.75rem; color: #475569; font-size: 0.875rem; font-weight: 500; text-decoration: none; transition: all 0.2s; border-bottom: 1px solid #f1f5f9; }
+        .user-dropdown-item:last-child { border-bottom: none; }
+        .user-dropdown-item:hover { background: #f8fafc; color: #0f172a; }
+        .user-dropdown-item i { font-size: 1rem; color: #64748b; }
+        .user-dropdown-item.logout { color: #ef4444; }
+        .user-dropdown-item.logout:hover { background: #fef2f2; }
+        .user-dropdown-item.logout i { color: #ef4444; }
+        .content { flex: 1; padding: 1rem 1.25rem; }
+        .card { background: white; border: 1px solid #e2e8f0; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin-bottom: 1rem; }
+        .card-header { padding: 0.875rem 1rem; border-bottom: 1px solid #e2e8f0; background: #fafafa; font-weight: 600; color: #0f172a; font-size: 1rem; }
+        .card-body { padding: 1rem; }
+        .btn { padding: 0.5rem 1rem; border-radius: 6px; font-weight: 600; font-size: 0.8125rem; transition: all 0.3s; border: none; }
+        .btn-primary { background: #3b82f6; color: white; }
+        .btn-primary:hover { background: #2563eb; transform: translateY(-1px); }
+        .btn-success { background: #10b981; color: white; }
+        .btn-danger { background: #ef4444; color: white; }
+        .badge { padding: 0.25rem 0.625rem; border-radius: 4px; font-size: 0.6875rem; font-weight: 600; text-transform: uppercase; }
+        .badge-rest { background: #dbeafe; color: #1e40af; }
+        .badge-scpi { background: #fed7aa; color: #92400e; }
+        .badge-sdk { background: #d1fae5; color: #065f46; }
+        .form-label { font-weight: 600; color: #0f172a; margin-bottom: 0.375rem; font-size: 0.8125rem; }
+        .form-control, .form-select { padding: 0.5rem 0.875rem; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 0.875rem; }
+        .form-control:focus, .form-select:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); outline: none; }
+        .alert { padding: 0.75rem 1rem; border-radius: 6px; margin-bottom: 0.75rem; border-left: 4px solid; }
+        .alert-success { background: #ecfdf5; border-color: #10b981; color: #065f46; }
+        .alert-danger { background: #fef2f2; border-color: #ef4444; color: #991b1b; }        .table { margin-bottom: 0.75rem; font-size: 0.875rem; }
+        .table th, .table td { padding: 0.5rem 0.75rem; }
+        .table thead th { font-size: 0.8125rem; font-weight: 600; }
+        .form-group, .mb-3 { margin-bottom: 0.875rem !important; }
+        .row { margin-left: -0.5rem; margin-right: -0.5rem; }
+        .row > * { padding-left: 0.5rem; padding-right: 0.5rem; }
+        h2, h3, h4 { margin-bottom: 0.75rem; margin-top: 0; }
+        p { margin-bottom: 0.5rem; }
+        /* Maximize page width - remove Bootstrap container constraints */
+        .container, .container-fluid { max-width: 100% !important; padding-left: 0 !important; padding-right: 0 !important; margin: 0 !important; }
+        /* Remove excessive margins from page elements */
+        .page-header, .page-title { margin-left: 0 !important; margin-right: 0 !important; padding-left: 1rem !important; padding-right: 1rem !important; }
+        /* Compact grid columns */
+        .col, .col-1, .col-2, .col-3, .col-4, .col-5, .col-6, .col-7, .col-8, .col-9, .col-10, .col-11, .col-12,
+        .col-sm, .col-sm-1, .col-sm-2, .col-sm-3, .col-sm-4, .col-sm-5, .col-sm-6, .col-sm-7, .col-sm-8, .col-sm-9, .col-sm-10, .col-sm-11, .col-sm-12,
+        .col-md, .col-md-1, .col-md-2, .col-md-3, .col-md-4, .col-md-5, .col-md-6, .col-md-7, .col-md-8, .col-md-9, .col-md-10, .col-md-11, .col-md-12,
+        .col-lg, .col-lg-1, .col-lg-2, .col-lg-3, .col-lg-4, .col-lg-5, .col-lg-6, .col-lg-7, .col-lg-8, .col-lg-9, .col-lg-10, .col-lg-11, .col-lg-12,
+        .col-xl, .col-xl-1, .col-xl-2, .col-xl-3, .col-xl-4, .col-xl-5, .col-xl-6, .col-xl-7, .col-xl-8, .col-xl-9, .col-xl-10, .col-xl-11, .col-xl-12 {
+            padding-left: 0.5rem !important;
+            padding-right: 0.5rem !important;
+        }
+        /* Reduce margins in all major sections */
+        .mb-1, .my-1 { margin-bottom: 0.375rem !important; }
+        .mb-2, .my-2 { margin-bottom: 0.5rem !important; }
+        .mb-3, .my-3 { margin-bottom: 0.75rem !important; }
+        .mb-4, .my-4 { margin-bottom: 1rem !important; }
+        .mb-5, .my-5 { margin-bottom: 1.25rem !important; }
+        .mt-1, .my-1 { margin-top: 0.375rem !important; }
+        .mt-2, .my-2 { margin-top: 0.5rem !important; }
+        .mt-3, .my-3 { margin-top: 0.75rem !important; }
+        .mt-4, .my-4 { margin-top: 1rem !important; }
+        .mt-5, .my-5 { margin-top: 1.25rem !important; }
+        /* Compact padding utilities */
+        .p-1 { padding: 0.375rem !important; }
+        .p-2 { padding: 0.5rem !important; }
+        .p-3 { padding: 0.75rem !important; }
+        .p-4 { padding: 1rem !important; }
+        .p-5 { padding: 1.25rem !important; }
+        
+        /* Breadcrumb styling */
+        .breadcrumb {
+            background-color: #f8fafc;
+            padding: 0.75rem 1rem;
+            border-radius: 0.375rem;
+            margin-bottom: 1.5rem;
+            font-size: 0.875rem;
+        }
+        .breadcrumb-item a {
+            color: #3b82f6;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        .breadcrumb-item a:hover {
+            text-decoration: underline;
+            color: #2563eb;
+        }
+        .breadcrumb-item.active {
+            color: #64748b;
+            font-weight: 500;
+        }
+        .breadcrumb-item + .breadcrumb-item::before {
+            content: "/";
+            color: #cbd5e1;
+            padding: 0 0.5rem;
+        }
+        
+        /* Page header styling consistency */
+        .page-header {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            padding: 1.25rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 4px rgba(59, 130, 246, 0.1);
+        }
+        .page-header h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .page-header h1 i {
+            font-size: 1.75rem;
+        }
+        
+        /* Toast Notification Styles */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            pointer-events: none;
+        }
+        .toast-notification {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            padding: 16px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 300px;
+            max-width: 400px;
+            pointer-events: auto;
+            animation: slideIn 0.3s ease-out;
+            border-left: 4px solid;
+        }
+        .toast-notification.removing {
+            animation: slideOut 0.3s ease-out forwards;
+        }
+        @@keyframes slideIn {
+            from { transform: translateX(400px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @@keyframes slideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(400px); opacity: 0; }
+        }
+        .toast-notification.success {
+            border-left-color: #10b981;
+        }
+        .toast-notification.error {
+            border-left-color: #ef4444;
+        }
+        .toast-notification.warning {
+            border-left-color: #f59e0b;
+        }
+        .toast-notification.info {
+            border-left-color: #3b82f6;
+        }
+        .toast-icon {
+            font-size: 24px;
+            flex-shrink: 0;
+        }
+        .toast-notification.success .toast-icon {
+            color: #10b981;
+        }
+        .toast-notification.error .toast-icon {
+            color: #ef4444;
+        }
+        .toast-notification.warning .toast-icon {
+            color: #f59e0b;
+        }
+        .toast-notification.info .toast-icon {
+            color: #3b82f6;
+        }
+        .toast-content {
+            flex: 1;
+        }
+        .toast-title {
+            font-weight: 600;
+            font-size: 14px;
+            color: #0f172a;
+            margin-bottom: 2px;
+        }
+        .toast-message {
+            font-size: 13px;
+            color: #64748b;
+            line-height: 1.4;
+        }
+        .toast-close {
+            background: none;
+            border: none;
+            color: #94a3b8;
+            cursor: pointer;
+            padding: 0;
+            font-size: 20px;
+            line-height: 1;
+            flex-shrink: 0;
+            transition: color 0.2s;
+        }
+        .toast-close:hover {
+            color: #64748b;
+        }
+        
+        /* Execution and Operation Type Card Styles */
+        .execution-type-card, .operation-type-card {
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            background: white;
+        }
+        .execution-type-card:hover, .operation-type-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+            border-color: #3b82f6;
+        }
+        .execution-type-card.selected, .operation-type-card.selected {
+            border-color: #3b82f6;
+            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+    </style>
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body>
+    <aside class='sidebar'>
+        <div class='brand'>
+            <a class='brand-logo' asp-page='/Dashboard'>
+                <i class='bi bi-gear-wide-connected'></i>
+                <div><div>nWave Test</div><div class='brand-subtitle'>Testing Platform</div></div>
+            </a>
+        </div>
+        <nav>
+            <div class='nav-section'>
+                <div class='nav-section-title'>Main</div>
+                <ul class='nav-menu'>
+                    <li class='nav-item'><a class='nav-link-main' asp-page='/Dashboard'><div class='nav-link-content'><i class='bi bi-speedometer2'></i><span>Dashboard</span></div></a></li>
+                    <li class='nav-item'><a class='nav-link-main' asp-page='/Schedule'><div class='nav-link-content'><i class='bi bi-calendar-event'></i><span>Schedule</span></div></a></li>
+                </ul>
+            </div>
+            <div class='nav-section'>
+                <div class='nav-section-title'>Functions</div>
+                <ul class='nav-menu'>
+                    <li class='nav-item' id='functionsMenu'>
+                        <div class='nav-link-main'><div class='nav-link-content'><i class='bi bi-code-square'></i><span>Function Management</span></div><i class='bi bi-chevron-right nav-chevron'></i></div>
+                        <ul class='submenu'>
+                            <li><a class='submenu-link' asp-page='/Index'><i class='bi bi-list-ul'></i> All Functions</a></li>
+                            <li><a class='submenu-link' asp-page='/Create'><i class='bi bi-plus-circle'></i> Create Function</a></li>
+                            <li><a class='submenu-link' asp-page='/Execute'><i class='bi bi-play-circle'></i> Execute Function</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+            <div class='nav-section'>
+                <div class='nav-section-title'>Testing</div>
+                <ul class='nav-menu'>
+                    <li class='nav-item' id='testMenu'>
+                        <div class='nav-link-main'><div class='nav-link-content'><i class='bi bi-check2-square'></i><span>Test Management</span></div><i class='bi bi-chevron-right nav-chevron'></i></div>
+                        <ul class='submenu'>
+                            <li><a class='submenu-link' asp-page='/TestCases'><i class='bi bi-list-check'></i> All Test Cases</a></li>
+                            <li><a class='submenu-link' asp-page='/TestCaseBuilder'><i class='bi bi-boxes'></i> Create Test Case</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+            <div class='nav-section'>
+                <div class='nav-section-title'>Resources</div>
+                <ul class='nav-menu'>
+                    <li class='nav-item' id='projectsMenu'>
+                        <div class='nav-link-main'><div class='nav-link-content'><i class='bi bi-folder'></i><span>Projects</span></div><i class='bi bi-chevron-right nav-chevron'></i></div>
+                        <ul class='submenu'>
+                            <li><a class='submenu-link' asp-page='/Projects/Index'><i class='bi bi-folder2-open'></i> All Projects</a></li>
+                            <li><a class='submenu-link' asp-page='/Projects/Create'><i class='bi bi-plus-circle'></i> Create Project</a></li>
+                        </ul>
+                    </li>
+                    <li class='nav-item' id='campaignsMenu'>
+                        <div class='nav-link-main'><div class='nav-link-content'><i class='bi bi-flag'></i><span>Campaigns</span></div><i class='bi bi-chevron-right nav-chevron'></i></div>
+                        <ul class='submenu'>
+                            <li><a class='submenu-link' asp-page='/Campaigns/Index'><i class='bi bi-flag-fill'></i> All Campaigns</a></li>
+                            <li><a class='submenu-link' asp-page='/Campaigns/Create'><i class='bi bi-plus-circle'></i> Create Campaign</a></li>
+                        </ul>
+                    </li>
+                    <li class='nav-item' id='setupsMenu'>
+                        <div class='nav-link-main'><div class='nav-link-content'><i class='bi bi-diagram-3'></i><span>Setups</span></div><i class='bi bi-chevron-right nav-chevron'></i></div>
+                        <ul class='submenu'>
+                            <li><a class='submenu-link' asp-page='/Setups/Index'><i class='bi bi-diagram-2'></i> All Setups</a></li>
+                            <li><a class='submenu-link' asp-page='/Setups/Create'><i class='bi bi-plus-circle'></i> Create Setup</a></li>
+                        </ul>
+                    </li>
+                    <li class='nav-item' id='instrumentsMenu'>
+                        <div class='nav-link-main'><div class='nav-link-content'><i class='bi bi-hdd-rack'></i><span>Instruments</span></div><i class='bi bi-chevron-right nav-chevron'></i></div>
+                        <ul class='submenu'>
+                            <li><a class='submenu-link' asp-page='/Instruments/Index'><i class='bi bi-hdd-stack'></i> All Instruments</a></li>
+                            <li><a class='submenu-link' asp-page='/Instruments/Create'><i class='bi bi-plus-circle'></i> Add Instrument</a></li>
+                        </ul>
+                    </li>
+                    
+                </ul>
+            </div>
+            <div class='nav-section'>
+                <div class='nav-section-title'>Administration</div>
+                <ul class='nav-menu'>
+                    <li class='nav-item' id='usersMenu'>
+                        <div class='nav-link-main'><div class='nav-link-content'><i class='bi bi-people'></i><span>Users</span></div><i class='bi bi-chevron-right nav-chevron'></i></div>
+                        <ul class='submenu'>
+                            <li><a class='submenu-link' asp-page='/Users'><i class='bi bi-person-lines-fill'></i> All Users</a></li>
+                            <li><a class='submenu-link' asp-page='/Users/Create'><i class='bi bi-person-plus'></i> Add User</a></li>
+                        </ul>
+                    </li>
+                    <li class='nav-item' id='rolesMenu'>
+                        <div class='nav-link-main'><div class='nav-link-content'><i class='bi bi-shield-check'></i><span>Roles</span></div><i class='bi bi-chevron-right nav-chevron'></i></div>
+                        <ul class='submenu'>
+                            <li><a class='submenu-link' asp-page='/Roles'><i class='bi bi-list-check'></i> All Roles</a></li>
+                            <li><a class='submenu-link' asp-page='/Roles/Create'><i class='bi bi-plus-circle'></i> Create Role</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+            <div class='nav-section'>
+                <div class='nav-section-title'>System</div>
+                <ul class='nav-menu'>
+                    <li class='nav-item'><a class='nav-link-main' href='/swagger' target='_blank'><div class='nav-link-content'><i class='bi bi-book'></i><span>API Documentation</span></div></a></li>
+                </ul>
+            </div>
+        </nav>
+    </aside>
+    <div class='main-wrapper'>
+        <header class='topbar'>
+            <div class='topbar-left'><h1>@ViewData["Title"]</h1></div>
+            <div class='topbar-right'>
+                <div class='status-badge'><span class='status-dot'></span><span>System Online</span></div>
+                <div class='user-menu'>
+                    <div class='user-avatar'>@(User.Identity?.IsAuthenticated == true ? User.Identity.Name?.Substring(0, 1).ToUpper() : "?")</div>
+                    <div class='user-name'>@(User.Identity?.IsAuthenticated == true ? User.Identity.Name : "Guest")</div>
+                    <div class='user-dropdown'>
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <div class='user-dropdown-item'>
+                                <i class='bi bi-person-circle'></i>
+                                <div>
+                                    <div style='font-weight: 700; color: #0f172a;'>@User.Identity.Name</div>
+                                    <div style='font-size: 0.75rem; color: #94a3b8;'>@(User.IsInRole("Administrator") ? "Administrator" : "Operator")</div>
+                                </div>
+                            </div>
+                            <a href='/Logout' class='user-dropdown-item logout' onclick='event.preventDefault(); window.location.href="/Logout";'>
+                                <i class='bi bi-box-arrow-right'></i>
+                                <span>Sign Out</span>
+                            </a>
+                        }
+                        else
+                        {
+                            <a asp-page='/Login' class='user-dropdown-item'>
+                                <i class='bi bi-box-arrow-in-right'></i>
+                                <span>Sign In</span>
+                            </a>
+                        }
+                    </div>
+                </div>
+            </div>
+        </header>
+        <main class='content'>@RenderBody()</main>
+    </div>
+    
+    <!-- Toast Container -->
+    <div class='toast-container' id='toastContainer'></div>
+    
+    <script src='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js'></script>
+    <script>
+        // Toast Notification System
+        function showToast(message, type, title) {
+            type = type || 'info';
+            title = title || (type === 'success' ? 'Success' : type === 'error' ? 'Error' : type === 'warning' ? 'Warning' : 'Info');
+            
+            var icons = {
+                'success': 'bi-check-circle-fill',
+                'error': 'bi-x-circle-fill',
+                'warning': 'bi-exclamation-triangle-fill',
+                'info': 'bi-info-circle-fill'
+            };
+            
+            var container = document.getElementById('toastContainer');
+            var toast = document.createElement('div');
+            toast.className = 'toast-notification ' + type;
+            toast.innerHTML = '<i class="bi ' + icons[type] + ' toast-icon"></i>' +
+                '<div class="toast-content">' +
+                '<div class="toast-title">' + title + '</div>' +
+                '<div class="toast-message">' + message + '</div>' +
+                '</div>' +
+                '<button class="toast-close" onclick="this.parentElement.remove()">×</button>';
+            
+            container.appendChild(toast);
+            
+            setTimeout(function() {
+                toast.classList.add('removing');
+                setTimeout(function() {
+                    toast.remove();
+                }, 300);
+            }, 5000);
+        }
+        
+        document.querySelectorAll('.nav-item').forEach(item => {
+            const mainLink = item.querySelector('.nav-link-main');
+            const submenu = item.querySelector('.submenu');
+            if (submenu && mainLink) mainLink.addEventListener('click', () => item.classList.toggle('expanded'));
+        });
+        document.addEventListener('DOMContentLoaded', () => {
+            const path = window.location.pathname.toLowerCase();
+            document.querySelectorAll('.submenu-link').forEach(link => {
+                const href = (link.getAttribute('asp-page') || link.getAttribute('href') || '').toLowerCase();
+                if (href && path.includes(href)) { link.classList.add('active'); link.closest('.nav-item')?.classList.add('expanded'); }
+            });
+            if (path.includes('create') || path.includes('execute') || path === '/') document.getElementById('functionsMenu')?.classList.add('expanded');
+            if (path.includes('test')) document.getElementById('testMenu')?.classList.add('expanded');
+            if (path.includes('project')) document.getElementById('projectsMenu')?.classList.add('expanded');            if (path.includes('campaign')) document.getElementById('campaignsMenu')?.classList.add('expanded');            if (path.includes('setup')) document.getElementById('setupsMenu')?.classList.add('expanded');
+            if (path.includes('instrument')) document.getElementById('instrumentsMenu')?.classList.add('expanded');
+            if (path.includes('user')) document.getElementById('usersMenu')?.classList.add('expanded');
+            if (path.includes('role')) document.getElementById('rolesMenu')?.classList.add('expanded');
+            
+            // User dropdown toggle
+            const userMenu = document.querySelector('.user-menu');
+            if (userMenu) {
+                userMenu.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    userMenu.classList.toggle('active');
+                });
+                // Close dropdown when clicking outside
+                document.addEventListener('click', () => {
+                    userMenu.classList.remove('active');
+                });
+            }
+        });
+    </script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

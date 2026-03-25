@@ -1,0 +1,278 @@
+@page
+@model MiddlewareEngine.Pages.Campaigns.CreateModel
+@{
+    ViewData["Title"] = "Create Campaign";
+}
+
+<nav aria-label="breadcrumb" style="margin-bottom:1.5rem;">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/Dashboard"><i class="bi bi-house-door"></i> Home</a></li>
+        <li class="breadcrumb-item"><a href="/Campaigns/Index"><i class="bi bi-flag"></i> Campaigns</a></li>
+        <li class="breadcrumb-item active">Create</li>
+    </ol>
+</nav>
+
+<div class="page-header">
+    <h1><i class="bi bi-plus-circle"></i> Create New Campaign</h1>
+</div>
+
+<form id="campaignForm">
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="bi bi-info-circle"></i> Campaign Information
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Campaign Name *</label>
+                    <input type="text" id="name" class="form-control" required placeholder="e.g., Regression Test Suite" />
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Project *</label>
+                    <select id="projectId" class="form-select" required>
+                        <option value="">Select Project...</option>
+                    </select>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Description</label>
+                <textarea id="description" class="form-control" rows="3" placeholder="Describe the purpose of this campaign..."></textarea>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Assign Setups * <span class="badge bg-primary" id="selectedCount">0 selected</span></label>
+                <div id="setupsContainer" style="border:2px solid #e2e8f0;border-radius:10px;padding:1rem;background:#f8fafc;min-height:100px;">
+                    <div style="text-align:center;color:#94a3b8;padding:2rem;">
+                        <i class="bi bi-arrow-up-circle" style="font-size:2rem;"></i>
+                        <p style="margin:0.5rem 0 0 0;">Please select a project first</p>
+                    </div>
+                </div>
+                <small class="text-muted">
+                    <i class="bi bi-info-circle"></i> Select at least one setup for this campaign
+                </small>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Tags (comma-separated)</label>
+                <input type="text" id="tags" class="form-control" placeholder="e.g., regression, automation, critical" />
+            </div>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-between">
+        <a href="/Campaigns/Index" class="btn btn-secondary">
+            <i class="bi bi-x-circle"></i> Cancel
+        </a>
+        <button type="submit" class="btn btn-primary btn-lg">
+            <i class="bi bi-check-circle"></i> Create & Build Campaign
+        </button>
+    </div>
+</form>
+
+@section Scripts {
+<script>
+    let allProjects = [];
+    let allSetups = [];
+    let selectedSetupIds = new Set();
+
+    document.addEventListener('DOMContentLoaded', async function() {
+        await loadData();
+    });
+
+    async function loadData() {
+        try {
+            [allProjects, allSetups] = await Promise.all([
+                fetch('/api/projects').then(r => r.json()),
+                fetch('/api/setups').then(r => r.json())
+            ]);
+
+            populateProjects();
+        } catch (error) {
+            showToast('Failed to load data', 'error');
+        }
+    }
+
+    function populateProjects() {
+        const select = document.getElementById('projectId');
+        allProjects.forEach(proj => {
+            const option = document.createElement('option');
+            option.value = proj.id;
+            option.textContent = proj.name;
+            select.appendChild(option);
+        });
+        
+        // Listen for project change to update setups
+        select.addEventListener('change', function() {
+            selectedSetupIds.clear();
+            updateSelectedCount();
+            populateSetupsForProject(this.value);
+        });
+    }
+
+    function populateSetupsForProject(projectId) {
+        const container = document.getElementById('setupsContainer');
+        container.innerHTML = ''; // Clear existing content
+        
+        if (!projectId) {
+            container.innerHTML = `
+                <div style="text-align:center;color:#94a3b8;padding:2rem;">
+                    <i class="bi bi-arrow-up-circle" style="font-size:2rem;"></i>
+                    <p style="margin:0.5rem 0 0 0;">Please select a project first</p>
+                </div>
+            `;
+            return;
+        }
+        
+        // Find the selected project
+        const project = allProjects.find(p => (p.id || p.Id) === projectId);
+        if (!project) {
+            container.innerHTML = `
+                <div style="text-align:center;color:#ef4444;padding:2rem;">
+                    <i class="bi bi-exclamation-triangle" style="font-size:2rem;"></i>
+                    <p style="margin:0.5rem 0 0 0;">Project not found</p>
+                </div>
+            `;
+            return;
+        }
+        
+        // Get setup IDs from the project
+        const projectSetupIds = project.setup_ids || project.setupIds || project.SetupIds || [];
+        
+        // Filter setups that belong to this project
+        const projectSetups = allSetups.filter(setup => {
+            const setupId = setup.id || setup.Id;
+            return projectSetupIds.includes(setupId);
+        });
+        
+        if (projectSetups.length === 0) {
+            container.innerHTML = `
+                <div style="text-align:center;color:#f59e0b;padding:2rem;">
+                    <i class="bi bi-inbox" style="font-size:2rem;"></i>
+                    <p style="margin:0.5rem 0 0.5rem 0;font-weight:600;">No setups assigned to this project</p>
+                    <a href="/Projects/Manage" class="btn btn-sm btn-warning" target="_blank">
+                        <i class="bi bi-gear"></i> Manage Project Setups
+                    </a>
+                </div>
+            `;
+            showToast('No setups found for selected project', 'warning');
+            return;
+        }
+        
+        // Render setups as cards with checkboxes
+        container.innerHTML = projectSetups.map(setup => {
+            const setupId = setup.id || setup.Id;
+            const setupName = setup.name || setup.Name;
+            const setupType = setup.type || setup.Type || 'General';
+            const setupLocation = setup.location || setup.Location || 'Unknown';
+            const setupStatus = setup.status || setup.Status || 'Active';
+            const instrumentCount = (setup.instrument_ids || setup.instrumentIds || setup.InstrumentIds || []).length;
+            
+            const statusColor = setupStatus.toLowerCase() === 'active' ? '#10b981' : '#94a3b8';
+            
+            return `
+                <div class="setup-card" data-setup-id="${setupId}" onclick="toggleSetup('${setupId}')" 
+                     style="padding:1rem;margin-bottom:0.75rem;background:white;border:2px solid #e2e8f0;border-radius:10px;cursor:pointer;transition:all 0.2s;">
+                    <div style="display:flex;align-items:start;gap:1rem;">
+                        <div style="flex-shrink:0;padding-top:0.25rem;">
+                            <input type="checkbox" class="form-check-input setup-checkbox" 
+                                   style="width:24px;height:24px;cursor:pointer;" 
+                                   onclick="event.stopPropagation();toggleSetup('${setupId}')">
+                        </div>
+                        <div style="flex:1;">
+                            <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.5rem;">
+                                <i class="bi bi-gear-fill" style="color:#f59e0b;font-size:1.25rem;"></i>
+                                <h6 style="margin:0;font-weight:700;color:#1e293b;font-size:1.1rem;">${setupName}</h6>
+                                <span style="padding:0.25rem 0.75rem;background:${statusColor};color:white;border-radius:20px;font-size:0.75rem;font-weight:600;">
+                                    ${setupStatus.toUpperCase()}
+                                </span>
+                            </div>
+                            <div style="display:flex;gap:1.5rem;flex-wrap:wrap;color:#64748b;font-size:0.875rem;">
+                                <span><i class="bi bi-tag"></i> ${setupType}</span>
+                                <span><i class="bi bi-geo-alt"></i> ${setupLocation}</span>
+                                <span><i class="bi bi-cpu"></i> ${instrumentCount} instrument${instrumentCount !== 1 ? 's' : ''}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+        
+        showToast(`${projectSetups.length} setup(s) available for this project`, 'success');
+    }
+    
+    function toggleSetup(setupId) {
+        if (selectedSetupIds.has(setupId)) {
+            selectedSetupIds.delete(setupId);
+        } else {
+            selectedSetupIds.add(setupId);
+        }
+        updateUI();
+    }
+    
+    function updateUI() {
+        // Update checkboxes and card styling
+        document.querySelectorAll('.setup-card').forEach(card => {
+            const setupId = card.dataset.setupId;
+            const checkbox = card.querySelector('.setup-checkbox');
+            const isSelected = selectedSetupIds.has(setupId);
+            
+            checkbox.checked = isSelected;
+            
+            if (isSelected) {
+                card.style.background = 'linear-gradient(135deg, #dcfce7 0%, #d1fae5 100%)';
+                card.style.borderColor = '#10b981';
+                card.style.borderWidth = '3px';
+            } else {
+                card.style.background = 'white';
+                card.style.borderColor = '#e2e8f0';
+                card.style.borderWidth = '2px';
+            }
+        });
+        
+        updateSelectedCount();
+    }
+    
+    function updateSelectedCount() {
+        const badge = document.getElementById('selectedCount');
+        const count = selectedSetupIds.size;
+        badge.textContent = `${count} selected`;
+        badge.className = count > 0 ? 'badge bg-success' : 'badge bg-secondary';
+    }
+
+    document.getElementById('campaignForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        // Validate at least one setup is selected
+        if (selectedSetupIds.size === 0) {
+            showToast('Please select at least one setup', 'error');
+            return;
+        }
+
+        const campaign = {
+            name: document.getElementById('name').value,
+            projectId: document.getElementById('projectId').value,
+            description: document.getElementById('description').value || null,
+            setupIds: Array.from(selectedSetupIds),
+            tags: document.getElementById('tags').value.split(',').map(t => t.trim()).filter(t => t),
+            status: 'Draft',
+            testGroups: []
+        };
+
+        try {
+            const response = await fetch('/api/campaigns', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(campaign)
+            });
+
+            if (response.ok) {
+                const created = await response.json();
+                showToast(`Campaign created successfully with ${selectedSetupIds.size} setup(s)!`, 'success');
+                setTimeout(() => window.location.href = `/Campaigns/Builder?id=${created.id}`, 1000);
+            } else {
+                showToast('Failed to create campaign', 'error');
+            }
+        } catch (error) {
+            showToast('Error: ' + error.message, 'error');
+        }
+    });
+</script>
+}

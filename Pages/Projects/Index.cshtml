@@ -1,0 +1,591 @@
+@page
+@model MiddlewareEngine.Pages.Projects.IndexModel
+@{
+    ViewData["Title"] = "Projects Management";
+}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+<nav aria-label="breadcrumb" style="margin-bottom:1rem;">
+    <ol class="breadcrumb" style="background:#f8fafc;padding:0.75rem 1rem;border-radius:8px;margin:0;">
+        <li class="breadcrumb-item"><a href="/Dashboard" style="color:#3b82f6;text-decoration:none;"><i class="bi bi-house-door"></i> Home</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Projects</li>
+    </ol>
+</nav>
+
+<style>
+    :root {
+        --primary: #3b82f6;
+        --success: #10b981;
+        --warning: #f59e0b;
+        --danger: #ef4444;
+        --info: #06b6d4;
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, var(--primary), #6366f1);
+        color: white;
+        padding: 1rem 1.25rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .page-header h1 {
+        margin: 0;
+        font-size: 1.25rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .filters-card {
+        background: white;
+        padding: 1rem;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        margin-bottom: 1rem;
+        border: 1px solid #e2e8f0;
+    }
+
+    .filters-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 0.75rem;
+    }
+
+    .filter-group label {
+        font-weight: 600;
+        color: #0f172a;
+        margin-bottom: 0.375rem;
+        font-size: 0.75rem;
+        display: block;
+    }
+
+    .filter-group input,
+    .filter-group select {
+        width: 100%;
+        padding: 0.5rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        font-size: 0.8125rem;
+    }
+
+    .projects-grid {
+        display: grid;
+        gap: 0.75rem;
+    }
+
+    .project-card {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        border: 1px solid #e2e8f0;
+        border-left: 3px solid var(--primary);
+        transition: all 0.2s;
+    }
+
+    .project-card:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        transform: translateY(-1px);
+    }
+
+    .card-header {
+        padding: 0.875rem 1rem;
+        border-bottom: 1px solid #e2e8f0;
+        background: #fafafa;
+        display: flex;
+        justify-content: space-between;
+        align-items: start;
+    }
+
+    .card-title h3 {
+        margin: 0 0 0.25rem 0;
+        font-size: 0.9375rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 0.375rem;
+    }
+
+    .card-title .description {
+        color: #64748b;
+        font-size: 0.8125rem;
+    }
+
+    .card-badges {
+        display: flex;
+        gap: 0.375rem;
+        flex-wrap: wrap;
+    }
+
+    .badge {
+        padding: 0.2rem 0.625rem;
+        border-radius: 10px;
+        font-size: 0.6875rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .badge-status {
+        background: #d1fae5;
+        color: #065f46;
+    }
+
+    .badge-priority {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .card-body {
+        padding: 0.875rem 1rem;
+    }
+
+    .resources-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.625rem;
+    }
+
+    .resource-box {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        padding: 0.625rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .resource-box:hover {
+        background: #eff6ff;
+        border-color: var(--primary);
+    }
+
+    .resource-box i {
+        font-size: 1.125rem;
+        color: var(--primary);
+        margin-bottom: 0.25rem;
+    }
+
+    .resource-value {
+        font-size: 1.125rem;
+        font-weight: 700;
+        color: #0f172a;
+    }
+
+    .resource-label {
+        font-size: 0.6875rem;
+        color: #64748b;
+        text-transform: uppercase;
+    }
+
+    .card-footer {
+        padding: 0.625rem 1rem;
+        background: #fafafa;
+        border-top: 1px solid #e2e8f0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .btn {
+        padding: 0.375rem 0.75rem;
+        border: none;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 0.75rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .btn-primary {
+        background: white;
+        color: var(--primary);
+    }
+
+    .btn-success {
+        background: var(--success);
+        color: white;
+    }
+
+    .btn-warning {
+        background: var(--warning);
+        color: white;
+    }
+
+    .btn-danger {
+        background: var(--danger);
+        color: white;
+    }
+
+    .btn-info {
+        background: var(--info);
+        color: white;
+    }
+
+    .details-section {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease;
+    }
+
+    .details-section.expanded {
+        max-height: 2000px;
+        overflow: visible;
+    }
+
+    .relationships {
+        padding: 1rem;
+        background: white;
+        border-top: 1px solid #e2e8f0;
+    }
+
+    .relationship-grid {
+        display: grid;
+        gap: 0.75rem;
+    }
+
+    .relationship-item {
+        padding: 0.625rem;
+        background: #f8fafc;
+        border-left: 3px solid var(--info);
+        border-radius: 4px;
+        font-size: 0.8125rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+</style>
+
+<div class="page-header">
+    <h1><i class="bi bi-folder"></i> Projects Management</h1>
+    <a href="/Projects/Create" class="btn btn-primary"><i class="bi bi-plus"></i> Create Project</a>
+</div>
+
+<div class="filters-card">
+    <div class="filters-grid">
+        <div class="filter-group">
+            <label><i class="bi bi-search"></i> Search</label>
+            <input type="text" id="searchFilter" placeholder="Search projects..." onkeyup="applyFilters()" />
+        </div>
+        <div class="filter-group">
+            <label><i class="bi bi-flag"></i> Priority</label>
+            <select id="priorityFilter" onchange="applyFilters()">
+                <option value="">All Priorities</option>
+                <option value="Critical">Critical</option>
+                <option value="High">High</option>
+                <option value="Medium">Medium</option>
+                <option value="Low">Low</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label><i class="bi bi-circle"></i> Status</label>
+            <select id="statusFilter" onchange="applyFilters()">
+                <option value="">All Status</option>
+                <option value="Active">Active</option>
+                <option value="Inactive">Inactive</option>
+                <option value="Completed">Completed</option>
+            </select>
+        </div>
+    </div>
+</div>
+
+<div id="projectsContainer" class="projects-grid">
+    <div style="text-align: center; padding: 2rem; color: #64748b;">
+        <i class="fas fa-spinner fa-spin" style="font-size: 2rem;"></i>
+        <p>Loading projects...</p>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    let allProjects = [], filteredProjects = [], allSetups = [], allInstruments = [];
+    let currentPage = 1, pageSize = 10;
+
+    document.addEventListener('DOMContentLoaded', async function () {
+        await Promise.all([loadProjects(), loadSetups(), loadInstruments()]);
+        applyFilters();
+    });
+
+    async function loadProjects() {
+        try {
+            const res = await fetch('/api/projects');
+            if (res.ok) allProjects = await res.json();
+        } catch (error) {
+            console.error('Error loading projects:', error);
+        }
+    }
+
+    async function loadSetups() {
+        try {
+            const res = await fetch('/api/setups');
+            if (res.ok) allSetups = await res.json();
+        } catch (error) {
+            console.error('Error loading setups:', error);
+        }
+    }
+
+    async function loadInstruments() {
+        try {
+            const res = await fetch('/api/instruments');
+            if (res.ok) allInstruments = await res.json();
+        } catch (error) {
+            console.error('Error loading instruments:', error);
+        }
+    }
+
+    function applyFilters() {
+        const search = document.getElementById('searchFilter').value.toLowerCase();
+        const priority = document.getElementById('priorityFilter').value;
+        const status = document.getElementById('statusFilter').value;
+
+        filteredProjects = allProjects.filter(p => {
+            return (!search || (p.name || '').toLowerCase().includes(search)) &&
+                (!priority || p.priority === priority) &&
+                (!status || p.status === status);
+        });
+
+        currentPage = 1;
+        renderProjects();
+    }
+
+    function renderProjects() {
+        const container = document.getElementById('projectsContainer');
+        
+        if (!filteredProjects.length) {
+            container.innerHTML = '<div style="text-align:center;padding:2rem;color:#64748b;"><i class="fas fa-inbox" style="font-size:3rem;margin-bottom:1rem;"></i><p>No projects found</p></div>';
+            return;
+        }
+
+        const start = (currentPage - 1) * pageSize;
+        const paginated = filteredProjects.slice(start, start + pageSize);
+
+        let html = '';
+        paginated.forEach(p => {
+            const setupCount = (p.setupIds || []).length;
+            
+            // Get detailed setup and instrument mapping
+            const assignedSetups = (p.setupIds || []).map(sid => {
+                const setup = allSetups.find(s => s.id === sid);
+                if (!setup) return null;
+                
+                const setupInstruments = (setup.instrumentIds || []).map(iid => {
+                    const inst = allInstruments.find(i => i.id === iid);
+                    return inst ? { name: inst.name, status: inst.status } : null;
+                }).filter(i => i);
+                
+                return { name: setup.name, type: setup.type, instruments: setupInstruments };
+            }).filter(s => s);
+            
+            // Calculate total instruments from setups
+            let totalInstruments = 0;
+            assignedSetups.forEach(s => { totalInstruments += s.instruments.length; });
+            
+            let mappingInfo = '';
+            if (assignedSetups.length > 0) {
+                mappingInfo = '<div style="border-top:1px solid #e2e8f0;padding-top:0.75rem;margin-top:0.75rem;">';
+                mappingInfo += '<div style="font-size:0.75rem;font-weight:600;color:#475569;margin-bottom:0.5rem;"><i class="bi bi-diagram-2"></i> Resource Mapping (' + totalInstruments + ' total instruments):</div>';
+                
+                assignedSetups.forEach((setup, idx) => {
+                    if (idx < 2) {
+                        mappingInfo += '<div style="font-size:0.75rem;color:#64748b;margin-left:0.5rem;margin-bottom:0.5rem;">';
+                        mappingInfo += '<div style="font-weight:600;color:#3b82f6;"><i class="bi bi-diagram-3"></i> ' + setup.name + ' (' + (setup.type || 'N/A') + ')</div>';
+                        
+                        if (setup.instruments.length > 0) {
+                            mappingInfo += '<div style="margin-left:1rem;margin-top:0.25rem;">';
+                            setup.instruments.forEach((inst, iidx) => {
+                                if (iidx < 3) {
+                                    const statusColor = inst.status === 'Available' ? '#10b981' : '#f59e0b';
+                                    mappingInfo += '<div style="color:#64748b;font-size:0.7rem;">• ' + inst.name + ' <span style="color:' + statusColor + ';font-weight:600;">(' + (inst.status || 'N/A') + ')</span></div>';
+                                }
+                            });
+                            if (setup.instruments.length > 3) {
+                                mappingInfo += '<div style="color:#94a3b8;font-size:0.65rem;">• +' + (setup.instruments.length - 3) + ' more...</div>';
+                            }
+                            mappingInfo += '</div>';
+                        } else {
+                            mappingInfo += '<div style="margin-left:1rem;color:#94a3b8;font-size:0.7rem;">No instruments</div>';
+                        }
+                        mappingInfo += '</div>';
+                    }
+                });
+                
+                if (assignedSetups.length > 2) {
+                    let remainingInstruments = 0;
+                    assignedSetups.slice(2).forEach(s => { remainingInstruments += s.instruments.length; });
+                    mappingInfo += '<div style="font-size:0.7rem;color:#94a3b8;margin-left:0.5rem;">+' + (assignedSetups.length - 2) + ' more setup(s) with ' + remainingInstruments + ' instruments...</div>';
+                }
+                
+                mappingInfo += '</div>';
+            }
+            
+            // Project timeline
+            let timelinePreview = '';
+            if (p.startDate || p.endDate) {
+                const daysLeft = p.endDate ? Math.ceil((new Date(p.endDate) - new Date()) / (1000*60*60*24)) : null;
+                timelinePreview = '<div style="font-size:0.75rem;color:#64748b;margin-top:0.5rem;"><i class="bi bi-calendar-range"></i> ';
+                if (p.startDate) timelinePreview += new Date(p.startDate).toLocaleDateString();
+                if (p.endDate) timelinePreview += ' → ' + new Date(p.endDate).toLocaleDateString();
+                if (daysLeft !== null) {
+                    if (daysLeft > 0) timelinePreview += ' <span style="color:#10b981;font-weight:600;">(' + daysLeft + ' days left)</span>';
+                    else if (daysLeft === 0) timelinePreview += ' <span style="color:#f59e0b;font-weight:600;">(Due today!)</span>';
+                    else timelinePreview += ' <span style="color:#ef4444;font-weight:600;">(Overdue by ' + Math.abs(daysLeft) + ' days)</span>';
+                }
+                timelinePreview += '</div>';
+            }
+
+            html += '<div class="project-card">' +
+                    '<div class="card-header">' +
+                        '<div class="card-title">' +
+                            '<h3><i class="bi bi-folder"></i> ' + (p.name || 'Unnamed Project') + '</h3>' +
+                            '<div class="description">' + (p.description || 'No description') + '</div>' +
+                            (p.customerName ? '<div class="description" style="margin-top:0.25rem;"><i class="bi bi-person-badge" style="color:#3b82f6;"></i> <strong>' + p.customerName + '</strong>' + (p.customerCompany ? ' - ' + p.customerCompany : '') + '</div>' : '') +
+                            timelinePreview +
+                        '</div>' +
+                        '<div class="card-badges">' +
+                            '<span class="badge badge-status">' + (p.status || 'Active') + '</span>' +
+                            '<span class="badge badge-priority">' + (p.priority || 'Medium') + '</span>' +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="card-body">' +
+                        mappingInfo +
+                        '<div class="resources-grid" style="margin-top:' + (mappingInfo ? '0.75rem' : '0') + ';">' +
+                            '<div class="resource-box">' +
+                                '<i class="bi bi-diagram-3"></i>' +
+                                '<div class="resource-value">' + setupCount + '</div>' +
+                                '<div class="resource-label">Setups</div>' +
+                            '</div>' +
+                            '<div class="resource-box">' +
+                                '<i class="bi bi-hdd-rack"></i>' +
+                                '<div class="resource-value">' + totalInstruments + '</div>' +
+                                '<div class="resource-label">Instruments</div>' +
+                            '</div>' +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="details-section" id="details-' + p.id + '"></div>' +
+                    '<div class="card-footer">' +
+                        '<div style="font-size:0.75rem;color:#64748b;">' +
+                            '<i class="bi bi-calendar"></i> ' + new Date(p.createdAt).toLocaleDateString() +
+                        '</div>' +
+                        '<div style="display:flex;gap:0.375rem;">' +
+                            '<button class="btn btn-info" onclick="toggleDetails(\'' + p.id + '\')"><i class="bi bi-eye"></i> View</button>' +
+                            '<button class="btn btn-success" onclick="manageResources(\'' + p.id + '\')"><i class="bi bi-link-45deg"></i> Manage</button>' +
+                            '<button class="btn btn-danger" onclick="deleteProject(\'' + p.id + '\', \'' + (p.name || '').replace(/'/g, "\\'") + '\')"><i class="bi bi-trash"></i> Delete</button>' +
+                        '</div>' +
+                    '</div>' +
+                '</div>';
+        });
+
+        container.innerHTML = html;
+    }
+
+    function toggleDetails(projectId) {
+        const details = document.getElementById('details-' + projectId);
+        if (details.classList.contains('expanded')) {
+            details.classList.remove('expanded');
+            details.innerHTML = '';
+        } else {
+            const project = allProjects.find(p => p.id === projectId);
+            if (!project) return;
+
+            // Show project timeline
+            let timeline = '';
+            if (project.startDate || project.endDate) {
+                timeline = '<div style="background:#f0f9ff;padding:0.75rem;border-radius:6px;margin-bottom:1rem;border:1px solid #bae6fd;">';
+                timeline += '<div style="font-weight:600;color:#0c4a6e;margin-bottom:0.5rem;"><i class="bi bi-calendar-range"></i> Project Timeline</div>';
+                timeline += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;font-size:0.85rem;color:#0369a1;">';
+                if (project.startDate) {
+                    timeline += '<div><strong>Start:</strong> ' + new Date(project.startDate).toLocaleDateString() + '</div>';
+                }
+                if (project.endDate) {
+                    timeline += '<div><strong>End:</strong> ' + new Date(project.endDate).toLocaleDateString() + '</div>';
+                    
+                    // Calculate days remaining
+                    const now = new Date();
+                    const end = new Date(project.endDate);
+                    const daysLeft = Math.ceil((end - now) / (1000 * 60 * 60 * 24));
+                    if (daysLeft > 0) {
+                        timeline += '<div style="grid-column:1/-1;color:#10b981;font-weight:600;"><i class="bi bi-clock"></i> ' + daysLeft + ' days remaining</div>';
+                    } else if (daysLeft === 0) {
+                        timeline += '<div style="grid-column:1/-1;color:#f59e0b;font-weight:600;"><i class="bi bi-exclamation-triangle"></i> Due today!</div>';
+                    } else {
+                        timeline += '<div style="grid-column:1/-1;color:#ef4444;font-weight:600;"><i class="bi bi-x-circle"></i> Overdue by ' + Math.abs(daysLeft) + ' days</div>';
+                    }
+                }
+                timeline += '</div></div>';
+            }
+
+            const setupsHTML = (project.setupIds || []).map(sid => {
+                const setup = allSetups.find(s => s.id === sid);
+                if (!setup) return '';
+                
+                // Get instruments in this setup
+                const setupInstruments = (setup.instrumentIds || []).map(iid => {
+                    const inst = allInstruments.find(i => i.id === iid);
+                    return inst ? inst.name + ' (' + (inst.status || 'Available') + ')' : null;
+                }).filter(n => n);
+                
+                let instrumentInfo = '';
+                if (setupInstruments.length > 0) {
+                    instrumentInfo = '<div style="margin-left:1.5rem;margin-top:0.5rem;font-size:0.8rem;color:#64748b;">';
+                    instrumentInfo += '<div style="font-weight:600;color:#475569;margin-bottom:0.25rem;"><i class="bi bi-hdd-rack"></i> Contains ' + setupInstruments.length + ' instrument(s):</div>';
+                    setupInstruments.forEach(instName => {
+                        instrumentInfo += '<div style="margin-left:0.75rem;">• ' + instName + '</div>';
+                    });
+                    instrumentInfo += '</div>';
+                }
+                
+                return '<div class="relationship-item" style="padding:0.75rem;">' +
+                    '<div><i class="bi bi-diagram-3"></i> <strong>' + setup.name + '</strong> (' + (setup.type || 'Setup') + ')' +
+                    (setup.location ? ' - ' + setup.location : '') + '</div>' +
+                    instrumentInfo +
+                    '</div>';
+            }).filter(x => x).join('');
+
+            let content = '<div class="relationships">';
+            content += timeline;
+            
+            if (setupsHTML) {
+                content += '<h4 style="font-size:0.875rem;margin:0 0 0.5rem 0;font-weight:600;color:#0f172a;"><i class="bi bi-diagram-3"></i> Assigned Setups with Instruments (' + (project.setupIds || []).length + ')</h4><div class="relationship-grid">' + setupsHTML + '</div>';
+            } else {
+                content += '<div style="text-align:center;color:#64748b;font-size:0.8125rem;padding:1rem;background:#f8fafc;border-radius:6px;"><i class="bi bi-info-circle"></i> No setups assigned to this project</div>';
+            }
+            
+            content += '</div>';
+            
+            details.innerHTML = content;
+            details.classList.add('expanded');
+        }
+    }
+
+    function manageResources(projectId) {
+        window.location.href = '/Projects/ManageResources?id=' + projectId;
+    }
+
+    async function deleteProject(id, name) {
+        if (!confirm('Delete project "' + name + '"?\n\nThis will not delete associated resources, only remove the project.')) return;
+        
+        try {
+            const res = await fetch('/api/projects/' + id, { method: 'DELETE' });
+            if (res.ok) {
+                showToast('Project deleted successfully', 'success');
+                await loadProjects();
+                applyFilters();
+            } else {
+                showToast('Failed to delete project', 'error');
+            }
+        } catch (error) {
+            console.error('Error deleting project:', error);
+            showToast('Error deleting project', 'error');
+        }
+    }
+</script>
+}

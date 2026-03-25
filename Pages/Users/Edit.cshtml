@@ -1,0 +1,271 @@
+@page
+@model MiddlewareEngine.Pages.Users.EditModel
+@{
+    ViewData["Title"] = "Edit User";
+}
+
+<style>
+    .form-container {
+        max-width: 100%;
+        margin: 0;
+    }
+    
+    .form-card {
+        background: white;
+        border-radius: 10px;
+        padding: 2rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+    
+    .form-header {
+        background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+        color: white;
+        padding: 1.25rem;
+        border-radius: 10px;
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-group {
+        margin-bottom: 1.25rem;
+    }
+    
+    .form-label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        font-size: 0.875rem;
+        color: #0f172a;
+    }
+    
+    .form-control-custom {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        font-size: 0.875rem;
+    }
+    
+    .form-control-custom:focus {
+        outline: none;
+        border-color: #8b5cf6;
+        box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+    }
+    
+    .checkbox-group {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 0.75rem;
+        padding: 1rem;
+        background: #f8fafc;
+        border-radius: 8px;
+    }
+    
+    .checkbox-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+    
+    .loading-spinner {
+        text-align: center;
+        padding: 2rem;
+        color: #8b5cf6;
+    }
+</style>
+
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/Dashboard">Home</a></li>
+        <li class="breadcrumb-item"><a href="/Users">Users</a></li>
+        <li class="breadcrumb-item active">Edit</li>
+    </ol>
+</nav>
+
+<div class="form-container">
+    <div class="form-header">
+        <h1 style="margin: 0; font-size: 1.5rem; font-weight: 700;"><i class="bi bi-pencil-square"></i> Edit User</h1>
+        <p style="margin: 0.25rem 0 0 0; opacity: 0.9; font-size: 0.875rem;">Update user information and permissions</p>
+    </div>
+    
+    <div class="form-card">
+        <div id="loadingIndicator" class="loading-spinner">
+            <i class="bi bi-arrow-repeat" style="font-size: 2rem; animation: spin 1s linear infinite;"></i>
+            <p>Loading user data...</p>
+        </div>
+        
+        <form id="editUserForm" style="display: none;">
+            <input type="hidden" id="userId">
+            
+            <div class="form-group">
+                <label class="form-label">Username *</label>
+                <input type="text" id="username" class="form-control-custom" required>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Full Name *</label>
+                <input type="text" id="fullName" class="form-control-custom" required>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Email *</label>
+                <input type="email" id="email" class="form-control-custom" required>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Password (leave blank to keep current)</label>
+                <input type="password" id="password" class="form-control-custom" minlength="6">
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Roles</label>
+                <div id="rolesCheckboxes" class="checkbox-group">
+                    <p>Loading roles...</p>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="checkbox-item" style="font-weight: 600;">
+                    <input type="checkbox" id="isActive">
+                    Active User
+                </label>
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary"><i class="bi bi-check-circle"></i> Update User</button>
+                <a href="/Users" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    @@keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+</style>
+
+<script>
+    let roles = [];
+    let currentUser = null;
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const userId = urlParams.get('id');
+        
+        if (!userId) {
+            showToast('No user ID provided', 'error');
+            setTimeout(function() { window.location.href = '/Users'; }, 1000);
+            return;
+        }
+        
+        document.getElementById('userId').value = userId;
+        loadRoles();
+        loadUser(userId);
+        
+        document.getElementById('editUserForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            await updateUser();
+        });
+    });
+    
+    async function loadRoles() {
+        try {
+            const response = await fetch('/api/roles');
+            roles = await response.json();
+        } catch (error) {
+            console.error('Error loading roles:', error);
+        }
+    }
+    
+    async function loadUser(userId) {
+        try {
+            const response = await fetch('/api/users/' + userId);
+            if (!response.ok) {
+                throw new Error('User not found');
+            }
+            currentUser = await response.json();
+            populateForm();
+        } catch (error) {
+            console.error('Error loading user:', error);
+            showToast('Failed to load user', 'error');
+            setTimeout(function() { window.location.href = '/Users'; }, 1000);
+        }
+    }
+    
+    function populateForm() {
+        document.getElementById('username').value = currentUser.username || '';
+        document.getElementById('fullName').value = currentUser.fullName || '';
+        document.getElementById('email').value = currentUser.email || '';
+        document.getElementById('isActive').checked = currentUser.isActive !== false;
+        
+        renderRoles();
+        
+        document.getElementById('loadingIndicator').style.display = 'none';
+        document.getElementById('editUserForm').style.display = 'block';
+    }
+    
+    function renderRoles() {
+        const container = document.getElementById('rolesCheckboxes');
+        if (roles.length === 0) {
+            container.innerHTML = '<p>No roles available</p>';
+            return;
+        }
+        
+        const userRoleIds = currentUser.roleIds || [];
+        
+        container.innerHTML = roles.map(function(role) {
+            const isChecked = userRoleIds.indexOf(role.id) !== -1;
+            return '<label class="checkbox-item">' +
+                   '<input type="checkbox" value="' + role.id + '" class="role-checkbox" ' + 
+                   (isChecked ? 'checked' : '') + '>' +
+                   role.name +
+                   '</label>';
+        }).join('');
+    }
+    
+    async function updateUser() {
+        const selectedRoles = Array.from(document.querySelectorAll('.role-checkbox:checked'))
+            .map(function(cb) { return cb.value; });
+        
+        const userId = document.getElementById('userId').value;
+        const password = document.getElementById('password').value;
+        
+        const user = {
+            username: document.getElementById('username').value,
+            fullName: document.getElementById('fullName').value,
+            email: document.getElementById('email').value,
+            roleIds: selectedRoles,
+            isActive: document.getElementById('isActive').checked
+        };
+        
+        if (password) {
+            user.password = password;
+        }
+        
+        try {
+            const response = await fetch('/api/users/' + userId, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(user)
+            });
+            
+            if (response.ok) {
+                showToast('User updated successfully', 'success');
+                setTimeout(function() { window.location.href = '/Users'; }, 1000);
+            } else {
+                const errorText = await response.text();
+                showToast('Failed to update user: ' + errorText, 'error');
+            }
+        } catch (error) {
+            console.error('Error updating user:', error);
+            showToast('Error updating user', 'error');
+        }
+    }
+</script>

@@ -1,0 +1,417 @@
+@page
+@model MiddlewareEngine.Pages.Setups.ManageInstrumentsModel
+@{
+    ViewData["Title"] = "Manage Setup Instruments";
+}
+
+<nav aria-label="breadcrumb" style="margin-bottom:1.5rem;">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/Dashboard"><i class="bi bi-house-door"></i> Home</a></li>
+        <li class="breadcrumb-item"><a href="/Setups/Index"><i class="bi bi-diagram-3"></i> Setups</a></li>
+        <li class="breadcrumb-item active" aria-current="page"><i class="bi bi-gear"></i> Manage Instruments</li>
+    </ol>
+</nav>
+
+<style>
+    .setup-item {
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 0.75rem;
+        background: white;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    
+    .setup-item:hover {
+        border-color: #3b82f6;
+        box-shadow: 0 2px 8px rgba(59, 130, 246, 0.15);
+    }
+    
+    .setup-item.selected {
+        background: #eff6ff;
+        border-color: #3b82f6;
+        border-width: 2px;
+    }
+    
+    .setup-item h6 {
+        margin: 0 0 0.5rem 0;
+        font-size: 0.9375rem;
+        font-weight: 700;
+        color: #1e293b;
+    }
+    
+    .setup-type {
+        font-size: 0.8125rem;
+        color: #64748b;
+        margin-bottom: 0.25rem;
+    }
+    
+    .instrument-count {
+        font-size: 0.8125rem;
+        color: #10b981;
+        font-weight: 600;
+    }
+    
+    .card {
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        border: 1px solid #e2e8f0;
+    }
+    
+    .card-header {
+        background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+        color: white;
+        padding: 1rem;
+        border-radius: 8px 8px 0 0;
+        border: none;
+    }
+    
+    .card-header h5 {
+        margin: 0;
+        font-weight: 700;
+        font-size: 1rem;
+    }
+    
+    .btn {
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 0.8125rem;
+        padding: 0.5rem 1rem;
+        transition: all 0.2s;
+    }
+    
+    .btn-primary {
+        background: #3b82f6;
+        border: none;
+    }
+    
+    .btn-primary:hover {
+        background: #2563eb;
+        transform: translateY(-1px);
+    }
+    
+    .btn-warning {
+        background: #f59e0b;
+        border: none;
+        color: white;
+    }
+    
+    .btn-warning:hover {
+        background: #d97706;
+        transform: translateY(-1px);
+    }
+    
+    .btn-success {
+        background: #10b981;
+        border: none;
+    }
+    
+    .btn-success:hover {
+        background: #059669;
+        transform: translateY(-1px);
+    }
+    
+    .btn-secondary {
+        background: #64748b;
+        border: none;
+    }
+    
+    .btn-secondary:hover {
+        background: #475569;
+    }
+</style>
+
+<div style="max-width:1400px;margin:0 auto;">
+    <div class="card" style="margin-bottom:2rem;">
+        <div class="card-body">
+            <h2 style="margin-bottom:1rem;color:#1e293b;">
+                <i class="bi bi-gear"></i> Manage Instruments for Setup
+            </h2>
+            <div id="setupInfo" style="padding:1rem;background-color:#f8fafc;border-radius:0.5rem;margin-bottom:1.5rem;">
+                <div style="font-size:1.1rem;font-weight:600;color:#1e293b;margin-bottom:0.5rem;">
+                    <i class="bi bi-diagram-3"></i> <span id="setupName">Loading...</span>
+                </div>
+                <div style="font-size:0.875rem;color:#64748b;margin-bottom:0.25rem;">
+                    <strong>Type:</strong> <span id="setupType"></span>
+                </div>
+                <div style="font-size:0.875rem;color:#64748b;">
+                    <strong>Status:</strong> <span id="setupStatus"></span>
+                </div>
+                <div style="font-size:0.875rem;color:#64748b;margin-top:0.5rem;">
+                    <strong>Assigned Instruments:</strong> <span id="assignedCount" style="color:#10b981;font-weight:700;">0</span>
+                </div>
+            </div>
+
+            <div class="row">
+                <!-- Available Instruments -->
+                <div class="col-md-5">
+                    <div class="card">
+                        <div class="card-header bg-light" style="background: linear-gradient(135deg, #06b6d4, #0891b2) !important;">
+                            <h5 class="mb-0"><i class="bi bi-hdd-rack"></i> Available Instruments</h5>
+                            <input type="text" id="instrumentSearch" class="form-control form-control-sm mt-2" placeholder="Search instruments..." style="background:white;">
+                        </div>
+                        <div class="card-body" style="max-height:500px;overflow-y:auto;">
+                            <div id="availableInstruments">Loading...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="col-md-2 d-flex flex-column justify-content-center align-items-center">
+                    <button class="btn btn-primary mb-3" onclick="assignSelected()" style="width:100%;">
+                        <i class="bi bi-arrow-right"></i> Assign
+                    </button>
+                    <button class="btn btn-warning" onclick="unassignSelected()" style="width:100%;">
+                        <i class="bi bi-arrow-left"></i> Remove
+                    </button>
+                </div>
+
+                <!-- Assigned Instruments -->
+                <div class="col-md-5">
+                    <div class="card">
+                        <div class="card-header bg-light" style="background: linear-gradient(135deg, #10b981, #059669) !important;">
+                            <h5 class="mb-0"><i class="bi bi-check-circle"></i> Assigned Instruments</h5>
+                        </div>
+                        <div class="card-body" style="max-height:500px;overflow-y:auto;">
+                            <div id="assignedInstruments">Loading...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4 d-flex gap-2 justify-content-end">
+                <button class="btn btn-success" onclick="saveChanges()">
+                    <i class="bi bi-check-lg"></i> Save Changes
+                </button>
+                <a href="/Setups/Index" class="btn btn-secondary">
+                    <i class="bi bi-x-lg"></i> Cancel
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let setupId = null;
+    let setup = null;
+    let allInstruments = [];
+    let availableInstruments = [];
+    let assignedInstrumentIds = [];
+    let selectedAvailable = new Set();
+    let selectedAssigned = new Set();
+
+    window.onload = async function() {
+        const params = new URLSearchParams(window.location.search);
+        setupId = params.get('id');
+        
+        if (!setupId) {
+            showToast('No setup ID provided', 'error');
+            setTimeout(function() { window.location.href = '/Setups/Index'; }, 1000);
+            return;
+        }
+
+        await loadData();
+    };
+
+    async function loadData() {
+        try {
+            // Load setup
+            const setupRes = await fetch('/api/setups/' + setupId);
+            setup = await setupRes.json();
+            
+            // Load all instruments
+            const instrumentsRes = await fetch('/api/instruments');
+            allInstruments = await instrumentsRes.json();
+            
+            assignedInstrumentIds = setup.instrumentIds || [];
+            
+            displaySetupInfo();
+            updateInstrumentLists();
+        } catch (error) {
+            console.error('Error loading data:', error);
+            showToast('Failed to load data: ' + error.message, 'error');
+        }
+    }
+
+    function displaySetupInfo() {
+        document.getElementById('setupName').textContent = setup.name || 'Unnamed Setup';
+        document.getElementById('setupType').textContent = setup.type || 'N/A';
+        document.getElementById('setupStatus').textContent = setup.status || 'Unknown';
+    }
+
+    function updateInstrumentLists() {
+        availableInstruments = allInstruments.filter(i => !assignedInstrumentIds.includes(i.id));
+        const assigned = allInstruments.filter(i => assignedInstrumentIds.includes(i.id));
+        
+        renderAvailableInstruments(availableInstruments);
+        renderAssignedInstruments(assigned);
+        
+        document.getElementById('assignedCount').textContent = assigned.length;
+    }
+
+    function getConnectionBadges(inst) {
+        if (!inst.connections || inst.connections.length === 0) {
+            return '<span style="padding:0.125rem 0.375rem;background:#e2e8f0;border-radius:4px;font-size:0.7rem;color:#475569;">' + (inst.connectionType || 'N/A') + '</span>';
+        }
+        
+        const connColors = {
+            'SCPI': '#06b6d4',
+            'REST': '#10b981',
+            'SSH': '#f59e0b',
+            'SDK': '#8b5cf6',
+            'VISA': '#ec4899'
+        };
+        
+        let badges = '';
+        inst.connections.forEach(conn => {
+            const color = connColors[conn.type] || '#64748b';
+            badges += '<span style="padding:0.125rem 0.375rem;background:' + color + ';color:white;border-radius:4px;font-size:0.7rem;font-weight:600;margin-right:0.25rem;">' + conn.type + '</span>';
+        });
+        return badges;
+    }
+
+    function renderAvailableInstruments(instruments) {
+        const container = document.getElementById('availableInstruments');
+        
+        if (instruments.length === 0) {
+            container.innerHTML = '<div style="text-align:center;color:#94a3b8;padding:2rem;">No available instruments</div>';
+            return;
+        }
+        
+        let html = '';
+        instruments.forEach(i => {
+            const isSelected = selectedAvailable.has(i.id);
+            const connBadges = getConnectionBadges(i);
+            
+            html += '<div class="setup-item ' + (isSelected ? 'selected' : '') + '" onclick="toggleAvailableSelection(\'' + i.id + '\')">' +
+                    '<h6><i class="bi bi-hdd-rack"></i> ' + (i.name || 'Unnamed') + '</h6>' +
+                    '<div class="setup-type"><i class="bi bi-tag"></i> ' + (i.type || 'N/A') + ' - ' + (i.manufacturer || 'N/A') + '</div>' +
+                    '<div class="setup-type"><i class="bi bi-info-circle"></i> ' + (i.model || 'N/A') + ' | ' + (i.serialNumber || 'N/A') + '</div>' +
+                    '<div style="margin-top:0.5rem;"><i class="bi bi-plug-fill"></i> ' + connBadges + '</div>' +
+                    '</div>';
+        });
+        
+        container.innerHTML = html;
+    }
+
+    function renderAssignedInstruments(instruments) {
+        const container = document.getElementById('assignedInstruments');
+        
+        if (instruments.length === 0) {
+            container.innerHTML = '<div style="text-align:center;color:#94a3b8;padding:2rem;">No assigned instruments</div>';
+            return;
+        }
+        
+        let html = '';
+        instruments.forEach(i => {
+            const isSelected = selectedAssigned.has(i.id);
+            const connBadges = getConnectionBadges(i);
+            
+            html += '<div class="setup-item ' + (isSelected ? 'selected' : '') + '" onclick="toggleAssignedSelection(\'' + i.id + '\')">' +
+                    '<h6><i class="bi bi-check-circle-fill" style="color:#10b981;"></i> ' + (i.name || 'Unnamed') + '</h6>' +
+                    '<div class="setup-type"><i class="bi bi-tag"></i> ' + (i.type || 'N/A') + ' - ' + (i.manufacturer || 'N/A') + '</div>' +
+                    '<div class="setup-type"><i class="bi bi-info-circle"></i> ' + (i.model || 'N/A') + ' | ' + (i.serialNumber || 'N/A') + '</div>' +
+                    '<div style="margin-top:0.5rem;"><i class="bi bi-plug-fill"></i> ' + connBadges + '</div>' +
+                    '</div>';
+        });
+        
+        container.innerHTML = html;
+    }
+
+    function toggleAvailableSelection(instrumentId) {
+        if (selectedAvailable.has(instrumentId)) {
+            selectedAvailable.delete(instrumentId);
+        } else {
+            selectedAvailable.add(instrumentId);
+        }
+        updateInstrumentLists();
+    }
+
+    function toggleAssignedSelection(instrumentId) {
+        if (selectedAssigned.has(instrumentId)) {
+            selectedAssigned.delete(instrumentId);
+        } else {
+            selectedAssigned.add(instrumentId);
+        }
+        updateInstrumentLists();
+    }
+
+    function assignSelected() {
+        if (selectedAvailable.size === 0) {
+            showToast('Please select instruments to assign', 'warning');
+            return;
+        }
+        
+        selectedAvailable.forEach(id => {
+            if (!assignedInstrumentIds.includes(id)) {
+                assignedInstrumentIds.push(id);
+            }
+        });
+        
+        selectedAvailable.clear();
+        updateInstrumentLists();
+    }
+
+    function unassignSelected() {
+        if (selectedAssigned.size === 0) {
+            showToast('Please select instruments to remove', 'warning');
+            return;
+        }
+        
+        selectedAssigned.forEach(id => {
+            const index = assignedInstrumentIds.indexOf(id);
+            if (index > -1) {
+                assignedInstrumentIds.splice(index, 1);
+            }
+        });
+        
+        selectedAssigned.clear();
+        updateInstrumentLists();
+    }
+
+    async function saveChanges() {
+        try {
+            const updatedSetup = {
+                ...setup,
+                instrumentIds: assignedInstrumentIds
+            };
+            
+            const response = await fetch('/api/setups/' + setupId, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(updatedSetup)
+            });
+            
+            if (!response.ok) {
+                throw new Error('Failed to update setup');
+            }
+            
+            showToast('Instruments updated successfully!', 'success');
+            setTimeout(function() { window.location.href = '/Setups/Index'; }, 1000);
+        } catch (error) {
+            console.error('Error saving changes:', error);
+            showToast('Failed to save changes: ' + error.message, 'error');
+        }
+    }
+
+    // Setup search functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('instrumentSearch');
+        if (searchInput) {
+            searchInput.addEventListener('input', function(e) {
+                const searchTerm = e.target.value.toLowerCase();
+                const filtered = allInstruments.filter(i => {
+                    return !assignedInstrumentIds.includes(i.id) &&
+                           ((i.name || '').toLowerCase().includes(searchTerm) ||
+                            (i.type || '').toLowerCase().includes(searchTerm) ||
+                            (i.manufacturer || '').toLowerCase().includes(searchTerm) ||
+                            (i.model || '').toLowerCase().includes(searchTerm));
+                });
+                renderAvailableInstruments(filtered);
+            });
+        }
+    });
+</script>

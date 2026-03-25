@@ -1,0 +1,314 @@
+@page
+@model MiddlewareEngine.Pages.Campaigns.IndexModel
+@{
+    ViewData["Title"] = "Test Campaigns";
+}
+
+<nav aria-label="breadcrumb" style="margin-bottom:1.5rem;">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/Dashboard"><i class="bi bi-house-door"></i> Home</a></li>
+        <li class="breadcrumb-item active"><i class="bi bi-flag"></i> Campaigns</li>
+    </ol>
+</nav>
+
+<div class="page-header">
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+        <div>
+            <h1><i class="bi bi-flag"></i> Test Campaigns</h1>
+            <p style="margin:0;opacity:0.9;font-size:0.9375rem;">Organize and execute test campaigns with groups and test cases</p>
+        </div>
+        <button class="btn btn-light" onclick="window.location.href='/Campaigns/Create'">
+            <i class="bi bi-plus-circle"></i> New Campaign
+        </button>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="card mb-4">
+    <div class="card-body" style="padding:1rem;">
+        <div class="row g-3">
+            <div class="col-md-3">
+                <input type="text" id="searchFilter" class="form-control" placeholder="🔍 Search campaigns..." onkeyup="applyFilters()" />
+            </div>
+            <div class="col-md-2">
+                <select id="projectFilter" class="form-select" onchange="applyFilters()">
+                    <option value="">All Projects</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select id="statusFilter" class="form-select" onchange="applyFilters()">
+                    <option value="">All Status</option>
+                    <option value="Draft">Draft</option>
+                    <option value="Ready">Ready</option>
+                    <option value="Running">Running</option>
+                    <option value="Completed">Completed</option>
+                    <option value="Failed">Failed</option>
+                </select>
+            </div>
+            <div class="col-md-5 text-end">
+                <span id="campaignCount" class="badge bg-primary" style="font-size:0.875rem;padding:0.5rem 1rem;">0 campaigns</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Campaigns Grid -->
+<div id="campaignsContainer" class="row g-4"></div>
+
+<style>
+    .campaign-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
+        cursor: pointer;
+        border: 2px solid transparent;
+    }
+    .campaign-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+        border-color: #3b82f6;
+    }
+    .campaign-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: start;
+        margin-bottom: 1rem;
+    }
+    .campaign-title {
+        font-size: 1.125rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin: 0 0 0.5rem 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .campaign-description {
+        font-size: 0.875rem;
+        color: #64748b;
+        margin-bottom: 1rem;
+        line-height: 1.5;
+    }
+    .campaign-stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+        margin: 1rem 0;
+        padding: 1rem;
+        background: #f8fafc;
+        border-radius: 8px;
+    }
+    .stat-item {
+        text-align: center;
+    }
+    .stat-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #0f172a;
+        display: block;
+    }
+    .stat-label {
+        font-size: 0.75rem;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-top: 0.25rem;
+    }
+    .campaign-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid #e2e8f0;
+    }
+    .campaign-meta {
+        display: flex;
+        gap: 1rem;
+        font-size: 0.8125rem;
+        color: #64748b;
+    }
+    .campaign-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+    .status-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .status-draft { background: #e2e8f0; color: #475569; }
+    .status-ready { background: #dbeafe; color: #1e40af; }
+    .status-running { background: #fef3c7; color: #92400e; }
+    .status-completed { background: #d1fae5; color: #065f46; }
+    .status-failed { background: #fee2e2; color: #991b1b; }
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: #64748b;
+    }
+    .empty-state i {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.3;
+    }
+</style>
+
+@section Scripts {
+<script>
+    let allCampaigns = [];
+    let allProjects = [];
+    let filteredCampaigns = [];
+
+    document.addEventListener('DOMContentLoaded', function() {
+        loadData();
+    });
+
+    async function loadData() {
+        try {
+            const [campaigns, projects] = await Promise.all([
+                fetch('/api/campaigns').then(r => r.json()),
+                fetch('/api/projects').then(r => r.json())
+            ]);
+            
+            allCampaigns = campaigns;
+            allProjects = projects;
+            
+            populateProjectFilter();
+            applyFilters();
+        } catch (error) {
+            console.error('Error loading data:', error);
+            showToast('Failed to load campaigns', 'error');
+        }
+    }
+
+    function populateProjectFilter() {
+        const filter = document.getElementById('projectFilter');
+        allProjects.forEach(proj => {
+            const option = document.createElement('option');
+            option.value = proj.id;
+            option.textContent = proj.name;
+            filter.appendChild(option);
+        });
+    }
+
+    function applyFilters() {
+        const search = document.getElementById('searchFilter').value.toLowerCase();
+        const project = document.getElementById('projectFilter').value;
+        const status = document.getElementById('statusFilter').value;
+
+        filteredCampaigns = allCampaigns.filter(c => {
+            return (!search || c.name.toLowerCase().includes(search) || (c.description || '').toLowerCase().includes(search)) &&
+                   (!project || c.projectId === project) &&
+                   (!status || c.status === status);
+        });
+
+        renderCampaigns();
+    }
+
+    function renderCampaigns() {
+        const container = document.getElementById('campaignsContainer');
+        document.getElementById('campaignCount').textContent = `${filteredCampaigns.length} campaign${filteredCampaigns.length !== 1 ? 's' : ''}`;
+
+        if (filteredCampaigns.length === 0) {
+            container.innerHTML = `
+                <div class="col-12">
+                    <div class="empty-state">
+                        <i class="bi bi-flag"></i>
+                        <h4>No campaigns found</h4>
+                        <p>Create your first test campaign to get started</p>
+                        <button class="btn btn-primary" onclick="window.location.href='/Campaigns/Create'">
+                            <i class="bi bi-plus-circle"></i> Create Campaign
+                        </button>
+                    </div>
+                </div>`;
+            return;
+        }
+
+        container.innerHTML = filteredCampaigns.map(campaign => {
+            const project = allProjects.find(p => p.id === campaign.projectId);
+            const groupCount = campaign.testGroups?.length || 0;
+            const testCaseCount = campaign.testGroups?.reduce((sum, g) => sum + (g.testCaseExecutions?.length || 0), 0) || 0;
+            
+            return `
+                <div class="col-md-6 col-lg-4">
+                    <div class="campaign-card" onclick="editCampaign('${campaign.id}')">
+                        <div class="campaign-header">
+                            <div style="flex:1;">
+                                <h3 class="campaign-title">
+                                    <i class="bi bi-flag-fill" style="color:#3b82f6;"></i>
+                                    ${campaign.name}
+                                </h3>
+                                <span class="status-badge status-${campaign.status.toLowerCase()}">${campaign.status}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="campaign-description">
+                            ${campaign.description || 'No description'}
+                        </div>
+
+                        <div class="campaign-stats">
+                            <div class="stat-item">
+                                <span class="stat-value">${groupCount}</span>
+                                <span class="stat-label">Groups</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-value">${testCaseCount}</span>
+                                <span class="stat-label">Test Cases</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-value">${campaign.setupId ? '✓' : '—'}</span>
+                                <span class="stat-label">Setup</span>
+                            </div>
+                        </div>
+
+                        <div class="campaign-footer">
+                            <div class="campaign-meta">
+                                <span><i class="bi bi-folder"></i> ${project?.name || 'Unknown'}</span>
+                                <span><i class="bi bi-calendar"></i> ${new Date(campaign.createdAt).toLocaleDateString()}</span>
+                            </div>
+                            <div class="campaign-actions" onclick="event.stopPropagation()">
+                                <button class="btn btn-sm btn-primary" onclick="builderCampaign('${campaign.id}')" title="Build Campaign">
+                                    <i class="bi bi-diagram-3"></i>
+                                </button>
+                                <button class="btn btn-sm btn-danger" onclick="deleteCampaign('${campaign.id}')" title="Delete">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+        }).join('');
+    }
+
+    function editCampaign(id) {
+        window.location.href = `/Campaigns/Edit?id=${id}`;
+    }
+
+    function builderCampaign(id) {
+        window.location.href = `/Campaigns/Builder?id=${id}`;
+    }
+
+    async function deleteCampaign(id) {
+        const campaign = allCampaigns.find(c => c.id === id);
+        if (!confirm(`Delete campaign "${campaign.name}"?`)) return;
+
+        try {
+            const response = await fetch(`/api/campaigns/${id}`, { method: 'DELETE' });
+            if (response.ok) {
+                showToast('Campaign deleted successfully', 'success');
+                loadData();
+            } else {
+                showToast('Failed to delete campaign', 'error');
+            }
+        } catch (error) {
+            showToast('Error: ' + error.message, 'error');
+        }
+    }
+</script>
+}

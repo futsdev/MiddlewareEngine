@@ -1,0 +1,356 @@
+@page
+@model MiddlewareEngine.Pages.LoginModel
+@{
+    ViewData["Title"] = "Login";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login - nWave Test</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f8fafc;
+            min-height: 100vh;
+            display: flex;
+            overflow-x: hidden;
+        }
+        .login-wrapper {
+            display: flex;
+            width: 100%;
+            min-height: 100vh;
+        }
+        .left-panel {
+            flex: 1;
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            padding: 3rem 2rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero-image {
+            width: 100%;
+            max-width: 600px;
+            height: auto;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+            margin-bottom: 2rem;
+        }
+        .platform-title {
+            text-align: center;
+            color: white;
+            margin-top: 1rem;
+        }
+        .platform-title h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        .platform-title p {
+            font-size: 1.125rem;
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 500;
+        }
+        .left-panel::before {
+            content: '';
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            top: -100px;
+            right: -100px;
+            animation: pulse 8s infinite;
+        }
+        @@keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+        .left-content {
+            position: relative;
+            z-index: 10;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        .brand-header {
+            margin-bottom: 2.5rem;
+            text-align: center;
+        }
+        .brand-logo-large {
+            width: 90px;
+            height: 90px;
+            background: linear-gradient(135deg, #3b82f6, #6366f1);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            box-shadow: 0 10px 30px rgba(59, 130, 246, 0.4);
+        }
+        .brand-logo-large i {
+            font-size: 3rem;
+            color: white;
+        }
+        .brand-header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .brand-header p {
+            font-size: 0.9375rem;
+            color: rgba(255,255,255,0.7);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        .right-panel {
+            flex: 0 0 480px;
+            background: white;
+            padding: 3rem 2rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            box-shadow: -5px 0 20px rgba(0,0,0,0.05);
+        }
+        .login-container {
+            width: 100%;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        .login-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .login-header h2 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 0.5rem;
+        }
+        .login-header p {
+            font-size: 0.875rem;
+            color: #64748b;
+        }
+        .form-floating {
+            margin-bottom: 0.875rem;
+        }
+        .form-floating label {
+            color: #64748b;
+            font-weight: 600;
+            font-size: 0.8125rem;
+        }
+        .form-control {
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 0.625rem 1rem;
+            font-size: 0.875rem;
+            transition: all 0.3s;
+            background: #f8fafc;
+        }
+        .form-control:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            background: white;
+            outline: none;
+        }
+        .form-check {
+            margin-bottom: 1.25rem;
+        }
+        .form-check-input {
+            width: 1rem;
+            height: 1rem;
+            border: 2px solid #cbd5e1;
+            margin-top: 0.125rem;
+        }
+        .form-check-input:checked {
+            background-color: #3b82f6;
+            border-color: #3b82f6;
+        }
+        .form-check-label {
+            color: #475569;
+            font-size: 0.8125rem;
+            font-weight: 500;
+        }
+        .btn-login {
+            width: 100%;
+            padding: 0.75rem;
+            background: #3b82f6;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            font-size: 0.9375rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        .btn-login:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+        }
+        .btn-login:active {
+            transform: translateY(0);
+        }
+        .btn-login i {
+            margin-left: 0.5rem;
+        }
+        .alert {
+            border-radius: 8px;
+            border-left: 4px solid #ef4444;
+            padding: 0.75rem 1rem;
+            margin-bottom: 1.25rem;
+            font-size: 0.8125rem;
+            font-weight: 500;
+            background: #fef2f2;
+            color: #991b1b;
+        }
+        .alert i {
+            margin-right: 0.5rem;
+        }
+        .login-footer {
+            text-align: center;
+            margin-top: 1.5rem;
+            padding-top: 1.25rem;
+            border-top: 1px solid #e2e8f0;
+        }
+        .login-footer p {
+            color: #64748b;
+            font-size: 0.75rem;
+            margin: 0 0 0.5rem 0;
+        }
+        .system-info {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 0.5rem;
+        }
+        .system-info-item {
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+            color: #64748b;
+            font-size: 0.6875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .system-info-item i {
+            color: #10b981;
+            font-size: 0.8125rem;
+        }
+        .input-icon {
+            position: relative;
+        }
+        .input-icon i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            font-size: 1rem;
+            z-index: 5;
+        }
+        .input-icon .form-control {
+            padding-left: 2.75rem;
+        }
+        .input-icon .form-floating label {
+            padding-left: 1.75rem;
+        }
+        @@media (max-width: 1024px) {
+            .login-wrapper { flex-direction: column; }
+            .left-panel, .right-panel { flex: none; }
+            .right-panel { flex: 0 0 auto; }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-wrapper">
+        <!-- Left Panel - Hero Image -->
+        <div class="left-panel">
+            <img src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=800&h=600&fit=crop" alt="nWave Test" class="hero-image" />
+            <div class="platform-title">
+                <h2>nWave Test</h2>
+                <p>Advanced Testing & Validation for All Radio Technologies</p>
+            </div>
+        </div>
+
+        <!-- Right Panel - Login Form -->
+        <div class="right-panel">
+            <div class="login-container">
+                <div class="login-header">
+                    <h2>Sign In</h2>
+                    <p>Enter your credentials to access the platform</p>
+                </div>
+
+                @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+                {
+                    <div class="alert alert-danger" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        @Model.ErrorMessage
+                    </div>
+                }
+
+                <form method="post">
+                    <div class="input-icon">
+                        <i class="bi bi-person-fill"></i>
+                        <div class="form-floating">
+                            <input type="text" class="form-control" id="username" name="username" placeholder="Username" required autofocus />
+                            <label for="username">Username</label>
+                        </div>
+                    </div>
+
+                    <div class="input-icon">
+                        <i class="bi bi-lock-fill"></i>
+                        <div class="form-floating">
+                            <input type="password" class="form-control" id="password" name="password" placeholder="Password" required />
+                            <label for="password">Password</label>
+                        </div>
+                    </div>
+
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="rememberMe" name="rememberMe" />
+                        <label class="form-check-label" for="rememberMe">
+                            Remember me on this device
+                        </label>
+                    </div>
+
+                    <button type="submit" class="btn btn-login">
+                        Sign In<i class="bi bi-arrow-right"></i>
+                    </button>
+                </form>
+
+                <div class="login-footer">
+                    <p>&copy; 2026 nWave Test</p>
+                    <div class="system-info">
+                        <div class="system-info-item">
+                            <i class="bi bi-shield-check"></i>
+                            <span>SECURE</span>
+                        </div>
+                        <div class="system-info-item">
+                            <i class="bi bi-clock"></i>
+                            <span>24/7 ACCESS</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

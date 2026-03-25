@@ -1,0 +1,400 @@
+@page
+@model MiddlewareEngine.Pages.Instruments.EditModel
+@{
+    ViewData["Title"] = "Edit Instrument";
+}
+
+<nav aria-label="breadcrumb" style="margin-bottom:1rem;">
+    <ol class="breadcrumb" style="background:#f8fafc;padding:0.75rem 1rem;border-radius:8px;margin:0;">
+        <li class="breadcrumb-item"><a href="/" style="color:#3b82f6;text-decoration:none;"><i class="bi bi-house-door"></i> Home</a></li>
+        <li class="breadcrumb-item"><a href="/Instruments" style="color:#3b82f6;text-decoration:none;">Instruments</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Edit</li>
+    </ol>
+</nav>
+
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+    }
+    .form-container {
+        max-width: 100%;
+        margin: 0;
+        background: white;
+        padding: 2rem;
+    }
+    .page-header {
+        background: linear-gradient(135deg, #06b6d4, #0891b2);
+        color: white;
+        padding: 1rem 1.25rem;
+        border-radius: 8px;
+        margin-bottom: 2rem;
+    }
+    .page-header h1 {
+        margin: 0;
+        font-size: 1.5rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.25rem;
+        margin-bottom: 1.25rem;
+    }
+    .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+    .form-group.full-width {
+        grid-column: 1 / -1;
+    }
+    .form-group label {
+        font-weight: 600;
+        color: #0f172a;
+        margin-bottom: 0.5rem;
+        font-size: 0.875rem;
+    }
+    .form-group input,
+    .form-group select {
+        padding: 0.625rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        font-size: 0.875rem;
+    }
+    .btn {
+        padding: 0.625rem 1.25rem;
+        border: none;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 0.875rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .btn-primary {
+        background: #06b6d4;
+        color: white;
+    }
+    .btn-primary:hover {
+        background: #0891b2;
+    }
+    .btn-secondary {
+        background: #64748b;
+        color: white;
+    }
+    .btn-secondary:hover {
+        background: #475569;
+    }
+    .form-actions {
+        display: flex;
+        gap: 0.75rem;
+        justify-content: flex-end;
+        padding-top: 1.5rem;
+        border-top: 1px solid #e2e8f0;
+    }
+    .alert {
+        padding: 0.875rem;
+        border-radius: 6px;
+        margin-bottom: 1rem;
+        display: none;
+    }
+    .alert-success {
+        background: #d1fae5;
+        color: #065f46;
+        border: 1px solid #10b981;
+    }
+    .alert-error {
+        background: #fee2e2;
+        color: #991b1b;
+        border: 1px solid #ef4444;
+    }
+    .loading {
+        text-align: center;
+        padding: 3rem;
+        color: #64748b;
+    }
+</style>
+
+<div class="form-container">
+    <div class="page-header">
+        <h1><i class="bi bi-pencil-square"></i> Edit Instrument</h1>
+    </div>
+
+    <div id="loading" class="loading">
+        <i class="fas fa-spinner fa-spin" style="font-size: 2rem;"></i>
+        <p>Loading instrument...</p>
+    </div>
+
+    <div id="alert" class="alert"></div>
+
+    <form id="instrumentForm" style="display: none;">
+        <input type="hidden" id="instrumentId" />
+        
+        <div class="form-grid">
+            <div class="form-group full-width">
+                <label for="name"><i class="bi bi-tag"></i> Instrument Name *</label>
+                <input type="text" id="name" name="name" required placeholder="Enter instrument name" />
+            </div>
+
+            <div class="form-group">
+                <label for="type"><i class="bi bi-diagram-2"></i> Type *</label>
+                <select id="type" name="type" required>
+                    <option value="">Select Type</option>
+                    <option value="Oscilloscope">Oscilloscope</option>
+                    <option value="Signal Generator">Signal Generator</option>
+                    <option value="Power Supply">Power Supply</option>
+                    <option value="Multimeter">Multimeter</option>
+                    <option value="Spectrum Analyzer">Spectrum Analyzer</option>
+                    <option value="Logic Analyzer">Logic Analyzer</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="manufacturer"><i class="bi bi-building"></i> Manufacturer</label>
+                <input type="text" id="manufacturer" name="manufacturer" placeholder="e.g., Keysight, Tektronix" />
+            </div>
+
+            <div class="form-group">
+                <label for="model"><i class="bi bi-box"></i> Model</label>
+                <input type="text" id="model" name="model" placeholder="Model number" />
+            </div>
+
+            <div class="form-group">
+                <label for="serialNumber"><i class="bi bi-upc-scan"></i> Serial Number</label>
+                <input type="text" id="serialNumber" name="serialNumber" placeholder="Serial number" />
+            </div>
+
+            <div class="form-group">
+                <label for="status"><i class="bi bi-circle"></i> Status</label>
+                <select id="status" name="status">
+                    <option value="Available">Available</option>
+                    <option value="In Use">In Use</option>
+                    <option value="Maintenance">Maintenance</option>
+                    <option value="Offline">Offline</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="location"><i class="bi bi-geo-alt"></i> Location</label>
+                <input type="text" id="location" name="location" placeholder="Lab location" />
+            </div>
+
+            <div class="form-group">
+                <label for="calibrationDate"><i class="bi bi-calendar-event"></i> Calibration Date</label>
+                <input type="date" id="calibrationDate" name="calibrationDate" />
+            </div>
+
+            <div class="form-group">
+                <label for="nextCalibrationDate"><i class="bi bi-calendar-check"></i> Next Calibration</label>
+                <input type="date" id="nextCalibrationDate" name="nextCalibrationDate" />
+            </div>
+
+            <div class="form-group full-width">
+                <label for="tags"><i class="bi bi-tags"></i> Tags (comma-separated)</label>
+                <input type="text" id="tags" name="tags" placeholder="e.g., precision, certified, lab-1" />
+            </div>
+
+            <!-- Connections Section -->
+            <div class="form-group full-width">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+                    <label style="margin:0;"><i class="bi bi-plug-fill"></i> Connection Types</label>
+                    <button type="button" class="btn btn-primary" onclick="addConnection()" style="padding:0.4rem 0.8rem;font-size:0.8125rem;">
+                        <i class="bi bi-plus-circle"></i> Add Connection
+                    </button>
+                </div>
+                <div id="connectionsContainer" style="display:grid;gap:1rem;">
+                    <!-- Connections will be loaded here dynamically -->
+                </div>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button type="button" class="btn btn-secondary" onclick="window.location.href='/Instruments/Index'">
+                <i class="bi bi-x-circle"></i> Cancel
+            </button>
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-check-circle"></i> Update Instrument
+            </button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+<script>
+    const instrumentId = '@Model.Id';
+    let connectionCount = 0;
+
+    document.addEventListener('DOMContentLoaded', async function() {
+        await loadInstrument();
+    });
+
+    async function loadInstrument() {
+        try {
+            const response = await fetch(`/api/instruments/${instrumentId}`);
+            if (response.ok) {
+                const instrument = await response.json();
+                
+                document.getElementById('instrumentId').value = instrument.id;
+                document.getElementById('name').value = instrument.name || '';
+                document.getElementById('type').value = instrument.type || '';
+                document.getElementById('manufacturer').value = instrument.manufacturer || '';
+                document.getElementById('model').value = instrument.model || '';
+                document.getElementById('serialNumber').value = instrument.serialNumber || '';
+                document.getElementById('status').value = instrument.status || 'Available';
+                document.getElementById('location').value = instrument.location || '';
+                
+                if (instrument.calibrationDate) {
+                    document.getElementById('calibrationDate').value = new Date(instrument.calibrationDate).toISOString().split('T')[0];
+                }
+                if (instrument.nextCalibrationDate) {
+                    document.getElementById('nextCalibrationDate').value = new Date(instrument.nextCalibrationDate).toISOString().split('T')[0];
+                }
+                
+                document.getElementById('tags').value = (instrument.tags || []).join(', ');
+
+                // Load connections
+                if (instrument.connections && instrument.connections.length > 0) {
+                    instrument.connections.forEach(conn => {
+                        addConnection(conn);
+                    });
+                } else {
+                    // Add one empty connection if none exist
+                    addConnection();
+                }
+
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('instrumentForm').style.display = 'block';
+            } else {
+                showToast('Failed to load instrument', 'error');
+                document.getElementById('loading').innerHTML = '<p style="color: #ef4444;">Failed to load instrument</p>';
+            }
+        } catch (error) {
+            showToast('Error loading instrument: ' + error.message, 'error');
+            document.getElementById('loading').innerHTML = '<p style="color: #ef4444;">Error loading instrument</p>';
+        }
+    }
+
+    function addConnection(connData) {
+        const id = connectionCount++;
+        const container = document.getElementById('connectionsContainer');
+        
+        const connectionDiv = document.createElement('div');
+        connectionDiv.id = 'connection-' + id;
+        connectionDiv.style.border = '1px solid #e2e8f0';
+        connectionDiv.style.padding = '1rem';
+        connectionDiv.style.borderRadius = '8px';
+        connectionDiv.style.background = '#f8fafc';
+        
+        connectionDiv.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;">' +
+            '<h4 style="margin:0;font-size:0.9375rem;color:#0f172a;"><i class="bi bi-plug"></i> Connection ' + (id + 1) + '</h4>' +
+            '<button type="button" class="btn btn-secondary" onclick="removeConnection(' + id + ')" style="padding:0.25rem 0.5rem;font-size:0.75rem;background:#ef4444;">' +
+            '<i class="bi bi-trash"></i></button>' +
+            '</div>' +
+            '<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:0.75rem;">' +
+            '<div><label style="font-size:0.8125rem;font-weight:600;margin-bottom:0.375rem;display:block;">Connection Type *</label>' +
+            '<select class="conn-type" data-id="' + id + '" style="width:100%;padding:0.5rem;border:1px solid #e2e8f0;border-radius:6px;font-size:0.8125rem;">' +
+            '<option value="">Select Type</option>' +
+            '<option value="SCPI" ' + (connData && connData.type === 'SCPI' ? 'selected' : '') + '>SCPI</option>' +
+            '<option value="REST" ' + (connData && connData.type === 'REST' ? 'selected' : '') + '>REST API</option>' +
+            '<option value="SSH" ' + (connData && connData.type === 'SSH' ? 'selected' : '') + '>SSH</option>' +
+            '<option value="VISA" ' + (connData && connData.type === 'VISA' ? 'selected' : '') + '>VISA</option>' +
+            '<option value="SDK" ' + (connData && connData.type === 'SDK' ? 'selected' : '') + '>SDK</option>' +
+            '</select></div>' +
+            '<div><label style="font-size:0.8125rem;font-weight:600;margin-bottom:0.375rem;display:block;">IP Address</label>' +
+            '<input type="text" class="conn-ip" data-id="' + id + '" value="' + (connData ? connData.ipAddress || '' : '') + '" placeholder="192.168.1.100" style="width:100%;padding:0.5rem;border:1px solid #e2e8f0;border-radius:6px;font-size:0.8125rem;"></div>' +
+            '<div><label style="font-size:0.8125rem;font-weight:600;margin-bottom:0.375rem;display:block;">Port</label>' +
+            '<input type="number" class="conn-port" data-id="' + id + '" value="' + (connData ? connData.port || '' : '') + '" placeholder="5025" style="width:100%;padding:0.5rem;border:1px solid #e2e8f0;border-radius:6px;font-size:0.8125rem;"></div>' +
+            '<div><label style="font-size:0.8125rem;font-weight:600;margin-bottom:0.375rem;display:block;">Username</label>' +
+            '<input type="text" class="conn-username" data-id="' + id + '" value="' + (connData ? connData.username || '' : '') + '" placeholder="admin" style="width:100%;padding:0.5rem;border:1px solid #e2e8f0;border-radius:6px;font-size:0.8125rem;"></div>' +
+            '<div><label style="font-size:0.8125rem;font-weight:600;margin-bottom:0.375rem;display:block;">Password</label>' +
+            '<input type="password" class="conn-password" data-id="' + id + '" value="' + (connData ? connData.password || '' : '') + '" style="width:100%;padding:0.5rem;border:1px solid #e2e8f0;border-radius:6px;font-size:0.8125rem;"></div>' +
+            '<div><label style="font-size:0.8125rem;font-weight:600;margin-bottom:0.375rem;display:block;">VISA Address</label>' +
+            '<input type="text" class="conn-visa" data-id="' + id + '" value="' + (connData ? connData.visaAddress || '' : '') + '" placeholder="TCPIP0::192.168.1.100::inst0::INSTR" style="width:100%;padding:0.5rem;border:1px solid #e2e8f0;border-radius:6px;font-size:0.8125rem;"></div>' +
+            '<div style="grid-column:1/-1;"><label style="font-size:0.8125rem;font-weight:600;margin-bottom:0.375rem;display:block;">Endpoint / Notes</label>' +
+            '<input type="text" class="conn-endpoint" data-id="' + id + '" value="' + (connData ? connData.endpoint || '' : '') + '" placeholder="REST endpoint or connection notes" style="width:100%;padding:0.5rem;border:1px solid #e2e8f0;border-radius:6px;font-size:0.8125rem;"></div>' +
+            '</div>';
+        
+        container.appendChild(connectionDiv);
+    }
+
+    function removeConnection(id) {
+        const elem = document.getElementById('connection-' + id);
+        if (elem) {
+            elem.remove();
+        }
+    }
+
+    function getConnections() {
+        const cons = [];
+        document.querySelectorAll('[id^="connection-"]').forEach(function(connDiv) {
+            const id = connDiv.id.split('-')[1];
+            const type = connDiv.querySelector('.conn-type[data-id="' + id + '"]').value;
+            
+            if (type) {
+                cons.push({
+                    type: type,
+                    ipAddress: connDiv.querySelector('.conn-ip[data-id="' + id + '"]').value || null,
+                    port: parseInt(connDiv.querySelector('.conn-port[data-id="' + id + '"]').value) || null,
+                    username: connDiv.querySelector('.conn-username[data-id="' + id + '"]').value || null,
+                    password: connDiv.querySelector('.conn-password[data-id="' + id + '"]').value || null,
+                    visaAddress: connDiv.querySelector('.conn-visa[data-id="' + id + '"]').value || null,
+                    endpoint: connDiv.querySelector('.conn-endpoint[data-id="' + id + '"]').value || null
+                });
+            }
+        });
+        return cons;
+    }
+
+    document.getElementById('instrumentForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const connections = getConnections();
+        
+        if (connections.length === 0) {
+            showToast('Please add at least one connection type', 'warning');
+            return;
+        }
+
+        const formData = {
+            id: document.getElementById('instrumentId').value,
+            name: document.getElementById('name').value,
+            type: document.getElementById('type').value,
+            manufacturer: document.getElementById('manufacturer').value,
+            model: document.getElementById('model').value,
+            serialNumber: document.getElementById('serialNumber').value,
+            connectionType: connections.length > 0 ? connections[0].type : 'SCPI',
+            ipAddress: connections.length > 0 && connections[0].ipAddress ? connections[0].ipAddress : null,
+            connections: connections,
+            status: document.getElementById('status').value,
+            location: document.getElementById('location').value,
+            calibrationDate: document.getElementById('calibrationDate').value || null,
+            nextCalibrationDate: document.getElementById('nextCalibrationDate').value || null,
+            tags: document.getElementById('tags').value.split(',').map(t => t.trim()).filter(t => t)
+        };
+
+        try {
+            const response = await fetch(`/api/instruments/${instrumentId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            });
+
+            if (response.ok) {
+                showToast('Instrument updated successfully!', 'success');
+                setTimeout(() => window.location.href = '/Instruments/Index', 1500);
+            } else {
+                const error = await response.text();
+                showToast('Failed to update instrument: ' + error, 'error');
+            }
+        } catch (error) {
+            showToast('Error: ' + error.message, 'error');
+        }
+    });
+</script>
+}

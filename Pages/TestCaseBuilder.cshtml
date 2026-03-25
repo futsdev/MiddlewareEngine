@@ -1,0 +1,1103 @@
+@page
+@model MiddlewareEngine.Pages.TestCaseBuilderModel
+@{
+    ViewData["Title"] = "Test Case Builder";
+}
+
+<nav aria-label="breadcrumb" style="margin-bottom:1.5rem;">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/"><i class="bi bi-house-door"></i> Home</a></li>
+        <li class="breadcrumb-item"><a href="/TestCases"><i class="fas fa-vial"></i> Test Cases</a></li>
+        <li class="breadcrumb-item active" aria-current="page"><i class="fas fa-hammer"></i> Builder</li>
+    </ol>
+</nav>
+
+@section Styles {
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+<style>
+    :root {
+        --primary: #2563eb;
+        --primary-dark: #1e40af;
+        --secondary: #64748b;
+        --success: #10b981;
+        --warning: #f59e0b;
+        --danger: #ef4444;
+        --info: #06b6d4;
+        --bg-light: #f8fafc;
+        --bg-card: #ffffff;
+        --border: #e2e8f0;
+        --text-primary: #0f172a;
+        --text-secondary: #475569;
+        --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+        --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    }
+
+    body {
+        background: var(--bg-light);
+        font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .page-title {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        color: white;
+        padding: 2rem;
+        margin: -2rem -2rem 2rem -2rem;
+        border-radius: 15px 15px 0 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .page-title h1 {
+        margin: 0;
+        font-size: 1.875rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .page-title .subtitle {
+        font-size: 0.875rem;
+        opacity: 0.9;
+        margin-top: 0.25rem;
+    }
+
+    .builder-container {
+        display: grid;
+        grid-template-columns: 320px 1fr;
+        gap: 1.5rem;
+        min-height: calc(100vh - 300px);
+    }
+
+    .toolbox {
+        background: var(--bg-card);
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: var(--shadow);
+        border: 1px solid var(--border);
+        height: fit-content;
+        position: sticky;
+        top: 1rem;
+    }
+
+    .toolbox-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 2px solid var(--border);
+    }
+
+    .toolbox-header i {
+        font-size: 1.25rem;
+        color: var(--primary);
+    }
+
+    .toolbox-header h3 {
+        margin: 0;
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--text-primary);
+    }
+
+    .tool-category {
+        margin-bottom: 1rem;
+    }
+
+    .tool-category h4 {
+        color: var(--text-secondary);
+        font-size: 0.6875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+    }
+
+    .tool-item {
+        background: var(--bg-card);
+        color: var(--text-primary);
+        padding: 0.5rem 0.75rem;
+        margin-bottom: 0.375rem;
+        border-radius: 6px;
+        cursor: grab;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.2s;
+        border: 1.5px solid var(--border);
+    }
+
+    .tool-item:hover {
+        transform: translateX(3px);
+        border-color: var(--primary);
+        box-shadow: var(--shadow);
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        color: white;
+    }
+
+    .tool-item:active {
+        cursor: grabbing;
+    }
+
+    .tool-item i {
+        font-size: 1rem;
+        width: 20px;
+        text-align: center;
+    }
+
+    .tool-item .tool-label {
+        font-weight: 500;
+        font-size: 0.8125rem;
+    }
+
+    .canvas-area {
+        background: var(--bg-card);
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: var(--shadow);
+        border: 1px solid var(--border);
+        overflow-y: auto;
+    }
+
+    .canvas-header {
+        background: linear-gradient(to right, #f8fafc, #e2e8f0);
+        margin: -2rem -2rem 2rem -2rem;
+        padding: 2rem;
+        border-radius: 12px 12px 0 0;
+        border-bottom: 3px solid var(--primary);
+    }
+
+    .canvas-header-title {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .canvas-header-title i {
+        font-size: 1.75rem;
+        color: var(--primary);
+    }
+
+    .canvas-header-title h2 {
+        margin: 0;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-primary);
+    }
+
+    .testcase-info {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        background: white;
+        padding: 1.5rem;
+        border-radius: 8px;
+        box-shadow: var(--shadow);
+        margin-bottom: 1.5rem;
+    }
+
+    .info-group {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .info-group label {
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+        font-size: 0.875rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .info-group label i {
+        color: var(--primary);
+        font-size: 0.875rem;
+    }
+
+    .info-group input, .info-group textarea, .info-group select {
+        padding: 0.75rem;
+        border: 2px solid var(--border);
+        border-radius: 8px;
+        font-size: 0.875rem;
+        transition: all 0.2s;
+        font-family: inherit;
+    }
+
+    .info-group input:focus, .info-group textarea:focus, .info-group select:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+    .info-group.full-width {
+        grid-column: 1 / -1;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+    }
+
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.875rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.2s;
+        white-space: nowrap;
+    }
+
+    .btn-save {
+        background: var(--primary);
+        color: white;
+    }
+
+    .btn-save:hover {
+        background: var(--primary-dark);
+        transform: translateY(-1px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .btn-execute {
+        background: var(--success);
+        color: white;
+    }
+
+    .btn-execute:hover {
+        background: #059669;
+        transform: translateY(-1px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .btn-load {
+        background: var(--info);
+        color: white;
+    }
+
+    .btn-load:hover {
+        background: #0891b2;
+        transform: translateY(-1px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .btn-secondary {
+        background: var(--secondary);
+        color: white;
+    }
+
+    .btn-secondary:hover {
+        background: #475569;
+    }
+
+    .btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none !important;
+    }
+
+    /* Edit Mode Banner */
+    .edit-mode-banner {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        color: white;
+        padding: 1rem 1.5rem;
+        margin: -2rem -2rem 1.5rem -2rem;
+        border-radius: 8px 8px 0 0;
+        animation: slideDown 0.3s ease-out;
+    }
+
+    @@keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .edit-banner-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .edit-banner-left {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .edit-banner-left i {
+        font-size: 2rem;
+        opacity: 0.9;
+    }
+
+    .edit-banner-left h3 {
+        margin: 0;
+        font-size: 1.125rem;
+        font-weight: 700;
+    }
+
+    .edit-banner-left p {
+        margin: 0.25rem 0 0 0;
+        font-size: 0.875rem;
+        opacity: 0.9;
+    }
+
+    .btn-back {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        padding: 0.625rem 1.25rem;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.875rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.2s;
+    }
+
+    .btn-back:hover {
+        background: rgba(255, 255, 255, 0.3);
+        border-color: rgba(255, 255, 255, 0.5);
+        transform: translateX(-3px);
+    }
+
+    /* Enhanced Button States */
+    .btn-save.edit-mode {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    }
+
+    .btn-save.edit-mode:hover {
+        background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+    }
+
+    .section {
+        margin-bottom: 2rem;
+        background: white;
+        border-radius: 12px;
+        box-shadow: var(--shadow);
+        border: 1px solid var(--border);
+        overflow: hidden;
+    }
+
+    .section-header {
+        background: linear-gradient(to right, var(--primary), var(--primary-dark));
+        color: white;
+        padding: 1rem 1.5rem;
+        font-weight: 600;
+        font-size: 0.875rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .section-header-left {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .section-header i {
+        font-size: 1.125rem;
+    }
+
+    .section-count {
+        background: rgba(255,255,255,0.2);
+        padding: 0.25rem 0.75rem;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        backdrop-filter: blur(10px);
+    }
+
+    .drop-zone {
+        min-height: 120px;
+        border: 2px dashed var(--border);
+        padding: 1.5rem;
+        background: var(--bg-light);
+        transition: all 0.2s;
+        position: relative;
+    }
+
+    .drop-zone.empty {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .drop-zone.empty::before {
+        content: '⬇ Drag and drop here';
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+        font-weight: 500;
+        opacity: 0.6;
+    }
+
+    .drop-zone.drag-over {
+        background: #dbeafe;
+        border-color: var(--primary);
+        border-style: solid;
+        box-shadow: inset 0 0 0 2px var(--primary);
+    }
+
+    .drop-zone.drag-over::before {
+        content: '✓ Drop here';
+        color: var(--primary);
+        opacity: 1;
+    }
+
+    .test-step, .test-action, .test-operation {
+        background: white;
+        border: 2px solid var(--border);
+        border-radius: 10px;
+        margin-bottom: 1rem;
+        overflow: hidden;
+        transition: all 0.2s;
+    }
+
+    .test-step {
+        border-left: 4px solid var(--primary);
+        box-shadow: 0 2px 4px rgba(37, 99, 235, 0.1);
+    }
+
+    .test-action {
+        border-left: 4px solid var(--warning);
+        box-shadow: 0 2px 4px rgba(245, 158, 11, 0.1);
+    }
+
+    .test-operation {
+        border-left: 4px solid var(--success);
+        box-shadow: 0 2px 4px rgba(16, 185, 129, 0.1);
+    }
+
+    .test-step:hover, .test-action:hover, .test-operation:hover {
+        box-shadow: var(--shadow-lg);
+        transform: translateY(-1px);
+    }
+
+    .element-header {
+        padding: 1rem 1.25rem;
+        background: linear-gradient(to right, #f8fafc, #ffffff);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: grab;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .element-header:active {
+        cursor: grabbing;
+    }
+
+    .element-title {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        font-size: 0.875rem;
+        flex: 1;
+    }
+
+    .element-order {
+        background: var(--primary);
+        color: white;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        font-weight: 700;
+        flex-shrink: 0;
+    }
+
+    .element-controls {
+        display: flex;
+        gap: 0.25rem;
+        flex-shrink: 0;
+    }
+
+    .control-btn {
+        background: transparent;
+        border: 1px solid transparent;
+        padding: 0.5rem;
+        cursor: pointer;
+        border-radius: 6px;
+        transition: all 0.2s;
+        color: var(--text-secondary);
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .control-btn:hover {
+        background: var(--bg-light);
+        border-color: var(--border);
+    }
+
+    .control-btn.move-up:hover { color: var(--primary); background: #dbeafe; }
+    .control-btn.move-down:hover { color: var(--primary); background: #dbeafe; }
+    .control-btn.toggle:hover { color: var(--info); background: #cffafe; }
+    .control-btn.edit:hover { color: var(--warning); background: #fef3c7; }
+    .control-btn.delete:hover { color: var(--danger); background: #fee2e2; }
+
+    .element-body {
+        padding: 1.25rem;
+        background: white;
+    }
+
+    .element-body.collapsed {
+        display: none;
+    }
+
+    .element-detail {
+        margin-bottom: 0.75rem;
+        color: var(--text-secondary);
+        font-size: 0.8125rem;
+        display: flex;
+        align-items: baseline;
+        gap: 0.5rem;
+    }
+
+    .element-detail strong {
+        color: var(--text-primary);
+        font-weight: 600;
+        min-width: 120px;
+    }
+
+    .element-detail span {
+        flex: 1;
+    }
+
+    .subsection {
+        margin-top: 1.25rem;
+        padding: 1rem;
+        background: var(--bg-light);
+        border-radius: 8px;
+        border: 1px solid var(--border);
+    }
+
+    .subsection h4 {
+        color: var(--text-primary);
+        font-size: 0.8125rem;
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .subsection h4 i {
+        color: var(--primary);
+    }
+
+    .subsection .drop-zone {
+        min-height: 80px;
+    }
+
+    .badge {
+        padding: 0.25rem 0.625rem;
+        border-radius: 12px;
+        font-size: 0.6875rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.025em;
+    }
+
+    .badge-restapi {
+        background: var(--primary);
+        color: white;
+    }
+
+    .badge-scpi {
+        background: #8b5cf6;
+        color: white;
+    }
+
+    .badge-sdkmethod {
+        background: var(--info);
+        color: white;
+    }
+
+    .badge-ssh {
+        background: var(--warning);
+        color: white;
+    }
+
+    /* Modal Styles */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(15, 23, 42, 0.7);
+        backdrop-filter: blur(4px);
+        animation: fadeIn 0.2s;
+    }
+
+    .modal-content {
+        background: white;
+        margin: 3% auto;
+        padding: 0;
+        border-radius: 12px;
+        width: 90%;
+        max-width: 700px;
+        max-height: 85vh;
+        overflow-y: auto;
+        box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        animation: slideIn 0.2s;
+    }
+
+    .modal-header {
+        background: linear-gradient(to right, var(--primary), var(--primary-dark));
+        color: white;
+        padding: 1.5rem 2rem;
+        border-radius: 12px 12px 0 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .modal-header h3 {
+        margin: 0;
+        font-size: 1.25rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .close {
+        color: white;
+        font-size: 1.5rem;
+        font-weight: bold;
+        cursor: pointer;
+        background: none;
+        border: none;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 6px;
+        transition: all 0.2s;
+    }
+
+    .close:hover {
+        background: rgba(255, 255, 255, 0.2);
+    }
+
+    .modal-body {
+        padding: 2rem;
+    }
+
+    .property-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .property-group label {
+        display: block;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+        font-size: 0.875rem;
+    }
+
+    .property-group input,
+    .property-group textarea,
+    .property-group select {
+        width: 100%;
+        padding: 0.75rem;
+        border: 2px solid var(--border);
+        border-radius: 8px;
+        font-size: 0.875rem;
+        font-family: inherit;
+        transition: all 0.2s;
+    }
+
+    .property-group input:focus,
+    .property-group textarea:focus,
+    .property-group select:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+    .property-group small {
+        display: block;
+        color: var(--text-secondary);
+        font-size: 0.75rem;
+        margin-top: 0.375rem;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+
+    .checkbox-group {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem;
+        background: var(--bg-light);
+        border-radius: 8px;
+    }
+
+    .checkbox-group input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+        accent-color: var(--primary);
+    }
+
+    .checkbox-group label {
+        margin: 0 !important;
+        cursor: pointer;
+        font-weight: 500;
+    }
+
+    .modal-footer {
+        padding: 1.5rem 2rem;
+        border-top: 1px solid var(--border);
+        background: var(--bg-light);
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.75rem;
+        border-radius: 0 0 12px 12px;
+    }
+
+    /* Notification */
+    .notification {
+        position: fixed;
+        top: 24px;
+        right: 24px;
+        background: white;
+        padding: 1rem 1.5rem;
+        border-radius: 8px;
+        box-shadow: var(--shadow-lg);
+        z-index: 2000;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        border-left: 4px solid;
+        animation: slideInRight 0.2s;
+        min-width: 300px;
+    }
+
+    .notification.success {
+        border-left-color: var(--success);
+    }
+
+    .notification.success i {
+        color: var(--success);
+    }
+
+    .notification.error {
+        border-left-color: var(--danger);
+    }
+
+    .notification.error i {
+        color: var(--danger);
+    }
+
+    .notification span {
+        font-weight: 500;
+        font-size: 0.875rem;
+        color: var(--text-primary);
+    }
+
+    /* Animations */
+    @@keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @@keyframes slideIn {
+        from { transform: translateY(-20px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+    }
+
+    @@keyframes slideInRight {
+        from { transform: translateX(400px); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+
+    @@keyframes fadeOut {
+        from { opacity: 1; }
+        to { opacity: 0; }
+    }
+
+    /* Responsive */
+    @@media (max-width: 1024px) {
+        .builder-container {
+            grid-template-columns: 1fr;
+        }
+        
+        .toolbox {
+            position: relative;
+            top: 0;
+        }
+        
+        .testcase-info {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+}
+
+<div class="container mt-4">
+    <div class="page-title">
+        <div>
+            <h1>
+                <i class="fas fa-flask"></i>
+                Instrument Test Case Designer
+            </h1>
+            <div class="subtitle">Create, configure, and execute automated test sequences for testing instruments</div>
+        </div>
+    </div>
+
+    <div class="builder-container">
+        <!-- Toolbox -->
+        <div class="toolbox">
+            <div class="toolbox-header">
+                <i class="fas fa-cube"></i>
+                <h3>Component Toolbox</h3>
+            </div>
+
+            <div class="tool-category">
+                <h4>Test Structure</h4>
+                <div class="tool-item" draggable="true" data-type="step">
+                    <i class="fas fa-layer-group"></i>
+                    <div class="tool-label">Test Step</div>
+                </div>
+            </div>
+
+            <div class="tool-category">
+                <h4>Actions</h4>
+                <div class="tool-item" draggable="true" data-type="action">
+                    <i class="fas fa-tasks"></i>
+                    <div class="tool-label">Test Action</div>
+                </div>
+            </div>
+
+            <div class="tool-category">
+                <h4>Operations</h4>
+                <div class="tool-item" draggable="true" data-type="operation-restapi">
+                    <i class="fas fa-cloud"></i>
+                    <div class="tool-label">REST API</div>
+                </div>
+                <div class="tool-item" draggable="true" data-type="operation-scpi">
+                    <i class="fas fa-microchip"></i>
+                    <div class="tool-label">SCPI Command</div>
+                </div>
+                <div class="tool-item" draggable="true" data-type="operation-sdkmethod">
+                    <i class="fas fa-puzzle-piece"></i>
+                    <div class="tool-label">SDK Method</div>
+                </div>
+                <div class="tool-item" draggable="true" data-type="operation-ssh">
+                    <i class="fas fa-terminal"></i>
+                    <div class="tool-label">SSH Command</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Canvas -->
+        <div class="canvas-area">
+            <!-- Edit Mode Banner -->
+            <div id="editModeBanner" class="edit-mode-banner" style="display: none;">
+                <div class="edit-banner-content">
+                    <div class="edit-banner-left">
+                        <i class="fas fa-edit"></i>
+                        <div>
+                            <h3>Editing Test Case</h3>
+                            <p id="editingTestCaseName"></p>
+                        </div>
+                    </div>
+                    <button class="btn-back" onclick="window.location.href='/TestCases'">
+                        <i class="fas fa-arrow-left"></i> Back to List
+                    </button>
+                </div>
+            </div>
+            
+            <div class="canvas-header">
+                <div class="canvas-header-title">
+                    <i class="fas fa-clipboard-check"></i>
+                    <h2 id="pageTitle">Test Case Configuration</h2>
+                </div>
+                <div class="testcase-info">
+                    <input type="hidden" id="testCaseId" value="" />
+                    <div class="info-group">
+                        <label for="testCaseName">
+                            <i class="fas fa-tag"></i>
+                            Test Case Name
+                        </label>
+                        <input type="text" id="testCaseName" placeholder="e.g., Power Supply Voltage Test" />
+                    </div>
+                    <div class="info-group">
+                        <label for="testCaseVersion">
+                            <i class="fas fa-code-branch"></i>
+                            Version
+                        </label>
+                        <input type="text" id="testCaseVersion" placeholder="1.0.0" value="1.0.0" />
+                    </div>
+                    <div class="info-group full-width">
+                        <label for="testCaseDescription">
+                            <i class="fas fa-align-left"></i>
+                            Description
+                        </label>
+                        <textarea id="testCaseDescription" rows="2" placeholder="Describe the test objectives, expected results, and any special requirements..."></textarea>
+                    </div>
+                    <div class="info-group full-width">
+                        <label for="testCaseTags">
+                            <i class="fas fa-tags"></i>
+                            Tags (comma-separated)
+                        </label>
+                        <input type="text" id="testCaseTags" placeholder="e.g., voltage, power-supply, production" />
+                    </div>
+                    <div class="info-group">
+                        <label for="testCaseCategory">
+                            <i class="fas fa-folder"></i>
+                            Category
+                        </label>
+                        <select id="testCaseCategory">
+                            <option value="Functional">Functional Testing</option>
+                            <option value="Performance">Performance Testing</option>
+                            <option value="Calibration">Calibration</option>
+                            <option value="Safety">Safety Compliance</option>
+                            <option value="Regression">Regression Testing</option>
+                            <option value="Integration">Integration Testing</option>
+                        </select>
+                    </div>
+                    <div class="info-group">
+                        <label for="testCasePriority">
+                            <i class="fas fa-flag"></i>
+                            Priority
+                        </label>
+                        <select id="testCasePriority">
+                            <option value="Critical">Critical</option>
+                            <option value="High">High</option>
+                            <option value="Medium" selected>Medium</option>
+                            <option value="Low">Low</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="action-buttons">
+                    <button class="btn btn-save" id="saveButton" onclick="saveTestCase()">
+                        <i class="fas fa-save"></i> <span id="saveButtonText">Save Test Case</span>
+                    </button>
+                    <button class="btn btn-secondary" id="cancelButton" onclick="window.location.href='/TestCases'" style="display: none;">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                    <button class="btn btn-execute" onclick="executeTestCase()">
+                        <i class="fas fa-play-circle"></i> Execute Test
+                    </button>
+                </div>
+            </div>
+
+            <!-- Setup Section -->
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-header-left">
+                        <i class="fas fa-cog"></i>
+                        <span>Pre-Test Setup</span>
+                    </div>
+                    <span class="section-count" id="setupCount">0</span>
+                </div>
+                <div class="drop-zone empty" id="setupZone"></div>
+            </div>
+
+            <!-- Test Steps Section -->
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-header-left">
+                        <i class="fas fa-list-ol"></i>
+                        <span>Test Execution Steps</span>
+                    </div>
+                    <span class="section-count" id="stepsCount">0</span>
+                </div>
+                <div class="drop-zone empty" id="stepsZone"></div>
+            </div>
+
+            <!-- Teardown Section -->
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-header-left">
+                        <i class="fas fa-power-off"></i>
+                        <span>Post-Test Cleanup</span>
+                    </div>
+                    <span class="section-count" id="teardownCount">0</span>
+                </div>
+                <div class="drop-zone empty" id="teardownZone"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Modal -->
+<div id="editModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3><i class="fas fa-edit"></i> <span id="modalTitle">Edit Element</span></h3>
+            <button class="close" onclick="closeEditModal()">&times;</button>
+        </div>
+        <div class="modal-body" id="modalProperties"></div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeEditModal()">
+                <i class="fas fa-times"></i> Cancel
+            </button>
+            <button class="btn btn-save" onclick="saveElement()">
+                <i class="fas fa-check"></i> Save Changes
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Function Selection Modal -->
+<div id="functionModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3><i class="fas fa-list"></i> Select Function</h3>
+            <button class="close" onclick="closeFunctionModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div id="functionList"></div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeFunctionModal()">
+                <i class="fas fa-times"></i> Cancel
+            </button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script src="~/js/testcase-builder.js"></script>
+}

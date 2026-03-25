@@ -1,0 +1,254 @@
+[
+  {
+    "function_id": "weather-by-city",
+    "name": "Get Weather by City",
+    "description": "Fetches current weather data for a given city using OpenWeatherMap API",
+    "execution_type": "RestApi",
+    "execution_config": {
+      "url": "https://api.openweathermap.org/data/2.5/weather",
+      "http_method": "GET",
+      "headers": {
+        "Accept": "application/json"
+      },
+      "timeout": 30
+    },
+    "parameters": [
+      {
+        "name": "q",
+        "type": "string",
+        "required": true,
+        "description": "City name"
+      },
+      {
+        "name": "appid",
+        "type": "string",
+        "required": true,
+        "description": "API key"
+      },
+      {
+        "name": "units",
+        "type": "string",
+        "required": false,
+        "default_value": "metric",
+        "description": "Units of measurement (standard, metric, imperial)"
+      }
+    ],
+    "is_active": true
+  },
+  {
+    "function_id": "get-user-info",
+    "name": "Get Random User",
+    "description": "Fetches random user data from JSONPlaceholder API",
+    "execution_type": "RestApi",
+    "execution_config": {
+      "url": "https://jsonplaceholder.typicode.com/users",
+      "http_method": "GET",
+      "timeout": 10
+    },
+    "parameters": [],
+    "is_active": true
+  },
+  {
+    "function_id": "create-post",
+    "name": "Create Post",
+    "description": "Creates a new post using JSONPlaceholder API",
+    "execution_type": "RestApi",
+    "execution_config": {
+      "url": "https://jsonplaceholder.typicode.com/posts",
+      "http_method": "POST",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "timeout": 15
+    },
+    "parameters": [
+      {
+        "name": "title",
+        "type": "string",
+        "required": true,
+        "description": "Post title"
+      },
+      {
+        "name": "body",
+        "type": "string",
+        "required": true,
+        "description": "Post content"
+      },
+      {
+        "name": "userId",
+        "type": "int",
+        "required": true,
+        "description": "User ID"
+      }
+    ],
+    "is_active": true
+  },
+  {
+    "function_id": "measure-voltage-ch1",
+    "name": "Measure Voltage Channel 1",
+    "description": "Measures voltage from oscilloscope channel 1",
+    "execution_type": "ScpiCommand",
+    "execution_config": {
+      "scpi_command": "MEAS:VOLT? {channel}",
+      "connection_string": "TCPIP::192.168.1.100::5025::SOCKET"
+    },
+    "parameters": [
+      {
+        "name": "channel",
+        "type": "string",
+        "required": true,
+        "default_value": "CH1",
+        "description": "Channel number (CH1, CH2, CH3, CH4)"
+      }
+    ],
+    "is_active": true
+  },
+  {
+    "function_id": "set-frequency",
+    "name": "Set Signal Generator Frequency",
+    "description": "Sets the frequency of a signal generator",
+    "execution_type": "ScpiCommand",
+    "execution_config": {
+      "scpi_command": "FREQ {frequency}",
+      "connection_string": "GPIB0::10::INSTR"
+    },
+    "parameters": [
+      {
+        "name": "frequency",
+        "type": "string",
+        "required": true,
+        "description": "Frequency value with unit (e.g., 1MHZ, 500KHZ)"
+      }
+    ],
+    "is_active": true
+  },
+  {
+    "function_id": "query-instrument-id",
+    "name": "Query Instrument ID",
+    "description": "Queries the instrument identification string",
+    "execution_type": "ScpiCommand",
+    "execution_config": {
+      "scpi_command": "*IDN?",
+      "connection_string": "TCPIP::192.168.1.100::INSTR"
+    },
+    "parameters": [],
+    "is_active": true
+  },
+  {
+    "function_id": "math-max",
+    "name": "Calculate Maximum",
+    "description": "Returns the maximum of two numbers using System.Math.Max",
+    "execution_type": "SdkMethod",
+    "execution_config": {
+      "assembly_name": "System.Private.CoreLib",
+      "class_name": "System.Math",
+      "method_name": "Max"
+    },
+    "parameters": [
+      {
+        "name": "val1",
+        "type": "double",
+        "required": true,
+        "description": "First number"
+      },
+      {
+        "name": "val2",
+        "type": "double",
+        "required": true,
+        "description": "Second number"
+      }
+    ],
+    "is_active": true
+  },
+  {
+    "function_id": "math-min",
+    "name": "Calculate Minimum",
+    "description": "Returns the minimum of two numbers using System.Math.Min",
+    "execution_type": "SdkMethod",
+    "execution_config": {
+      "assembly_name": "System.Private.CoreLib",
+      "class_name": "System.Math",
+      "method_name": "Min"
+    },
+    "parameters": [
+      {
+        "name": "val1",
+        "type": "double",
+        "required": true,
+        "description": "First number"
+      },
+      {
+        "name": "val2",
+        "type": "double",
+        "required": true,
+        "description": "Second number"
+      }
+    ],
+    "is_active": true
+  },
+  {
+    "function_id": "math-round",
+    "name": "Round Number",
+    "description": "Rounds a decimal value to a specified number of fractional digits",
+    "execution_type": "SdkMethod",
+    "execution_config": {
+      "assembly_name": "System.Private.CoreLib",
+      "class_name": "System.Math",
+      "method_name": "Round"
+    },
+    "parameters": [
+      {
+        "name": "d",
+        "type": "double",
+        "required": true,
+        "description": "A decimal number to be rounded"
+      },
+      {
+        "name": "digits",
+        "type": "int",
+        "required": true,
+        "description": "The number of fractional digits"
+      }
+    ],
+    "is_active": true
+  },
+  {
+    "function_id": "string-concat",
+    "name": "Concatenate Strings",
+    "description": "Concatenates two strings using System.String.Concat",
+    "execution_type": "SdkMethod",
+    "execution_config": {
+      "assembly_name": "System.Private.CoreLib",
+      "class_name": "System.String",
+      "method_name": "Concat"
+    },
+    "parameters": [
+      {
+        "name": "str0",
+        "type": "string",
+        "required": true,
+        "description": "First string"
+      },
+      {
+        "name": "str1",
+        "type": "string",
+        "required": true,
+        "description": "Second string"
+      }
+    ],
+    "is_active": true
+  },
+  {
+    "function_id": "datetime-now",
+    "name": "Get Current DateTime",
+    "description": "Returns the current date and time",
+    "execution_type": "SdkMethod",
+    "execution_config": {
+      "assembly_name": "System.Private.CoreLib",
+      "class_name": "System.DateTime",
+      "method_name": "get_Now"
+    },
+    "parameters": [],
+    "is_active": true
+  }
+]

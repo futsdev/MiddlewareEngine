@@ -1,0 +1,463 @@
+@page
+@model CreateModel
+@{
+    ViewData["Title"] = "Create Function";
+}
+
+<nav aria-label="breadcrumb" style="margin-bottom:1.5rem;">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/Dashboard"><i class="bi bi-house-door"></i> Home</a></li>
+        <li class="breadcrumb-item"><a href="/Index"><i class="bi bi-list-ul"></i> Functions</a></li>
+        <li class="breadcrumb-item active" aria-current="page"><i class="bi bi-plus-circle"></i> Create</li>
+    </ol>
+</nav>
+
+<div class="page-header">
+    <h1><i class="bi bi-plus-circle"></i> Create New Function Definition</h1>
+</div>
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show">
+        <i class="bi bi-exclamation-triangle"></i> @TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<form method="post">
+    <!-- Basic Information -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="bi bi-info-circle"></i> Basic Information
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label asp-for="Function.FunctionId" class="form-label">Function ID *</label>
+                    <input asp-for="Function.FunctionId" class="form-control" required 
+                           placeholder="e.g., my-function-id" />
+                    <small class="text-muted">Unique identifier for this function</small>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label asp-for="Function.Name" class="form-label">Function Name *</label>
+                    <input asp-for="Function.Name" class="form-control" required 
+                           placeholder="e.g., My Function" />
+                </div>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Function.Description" class="form-label">Description</label>
+                <textarea asp-for="Function.Description" class="form-control" rows="2"
+                          placeholder="Describe what this function does"></textarea>
+            </div>
+            <div class="form-check">
+                <input asp-for="Function.IsActive" class="form-check-input" type="checkbox" checked />
+                <label asp-for="Function.IsActive" class="form-check-label">Active</label>
+            </div>
+        </div>
+    </div>
+
+    <!-- Execution Type Selection -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="bi bi-gear"></i> Execution Type
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <div class="execution-type-card card text-center p-3" data-type="RestApi">
+                        <i class="bi bi-cloud-arrow-up display-4 text-primary"></i>
+                        <h5 class="mt-2">REST API</h5>
+                        <p class="text-muted small">Call external HTTP APIs</p>
+                        <input type="radio" name="Function.ExecutionType" value="RestApi" class="d-none" />
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="execution-type-card card text-center p-3" data-type="ScpiCommand">
+                        <i class="bi bi-terminal display-4 text-danger"></i>
+                        <h5 class="mt-2">SCPI Command</h5>
+                        <p class="text-muted small">Control instruments via SCPI</p>
+                        <input type="radio" name="Function.ExecutionType" value="ScpiCommand" class="d-none" />
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="execution-type-card card text-center p-3" data-type="Ssh">
+                        <i class="bi bi-hdd-network display-4 text-warning"></i>
+                        <h5 class="mt-2">SSH</h5>
+                        <p class="text-muted small">Execute via SSH/SFTP</p>
+                        <input type="radio" name="Function.ExecutionType" value="Ssh" class="d-none" />
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="execution-type-card card text-center p-3" data-type="SdkMethod">
+                        <i class="bi bi-code-slash display-4 text-info"></i>
+                        <h5 class="mt-2">SDK Method</h5>
+                        <p class="text-muted small">Invoke .NET methods</p>
+                        <input type="radio" name="Function.ExecutionType" value="SdkMethod" class="d-none" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Operation Type Selection -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="bi bi-arrow-left-right"></i> Operation Type
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <div class="operation-type-card card text-center p-3" data-op="READ">
+                        <i class="bi bi-download display-6 text-success"></i>
+                        <h6 class="mt-2">READ</h6>
+                        <p class="text-muted small">Query/retrieve data</p>
+                        <input type="radio" name="Function.OperationType" value="READ" class="d-none" checked />
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="operation-type-card card text-center p-3" data-op="WRITE">
+                        <i class="bi bi-upload display-6 text-primary"></i>
+                        <h6 class="mt-2">WRITE</h6>
+                        <p class="text-muted small">Send commands/data</p>
+                        <input type="radio" name="Function.OperationType" value="WRITE" class="d-none" />
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="operation-type-card card text-center p-3" data-op="FILE_UPLOAD">
+                        <i class="bi bi-file-earmark-arrow-up display-6 text-info"></i>
+                        <h6 class="mt-2">FILE UPLOAD</h6>
+                        <p class="text-muted small">Upload files</p>
+                        <input type="radio" name="Function.OperationType" value="FILE_UPLOAD" class="d-none" />
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="operation-type-card card text-center p-3" data-op="FILE_DOWNLOAD">
+                        <i class="bi bi-file-earmark-arrow-down display-6 text-warning"></i>
+                        <h6 class="mt-2">FILE DOWNLOAD</h6>
+                        <p class="text-muted small">Download files</p>
+                        <input type="radio" name="Function.OperationType" value="FILE_DOWNLOAD" class="d-none" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- REST API Configuration -->
+    <div id="restApiConfig" class="card mb-4" style="display:none;">
+        <div class="card-header">
+            <i class="bi bi-cloud-arrow-up"></i> REST API Configuration
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-8 mb-3">
+                    <label asp-for="Function.ExecutionConfig.Url" class="form-label">API URL *</label>
+                    <input asp-for="Function.ExecutionConfig.Url" class="form-control" 
+                           placeholder="https://api.example.com/endpoint" />
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label asp-for="Function.ExecutionConfig.HttpMethod" class="form-label">HTTP Method *</label>
+                    <select asp-for="Function.ExecutionConfig.HttpMethod" class="form-select">
+                        <option value="">Select...</option>
+                        <option value="GET">GET</option>
+                        <option value="POST">POST</option>
+                        <option value="PUT">PUT</option>
+                        <option value="DELETE">DELETE</option>
+                    </select>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Headers (JSON format)</label>
+                    <textarea id="restHeaders" class="form-control" rows="3"
+                              placeholder='{"Authorization": "Bearer token", "Content-Type": "application/json"}'></textarea>
+                    <input asp-for="Function.ExecutionConfig.Headers" type="hidden" id="restHeadersHidden" />
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label asp-for="Function.ExecutionConfig.Timeout" class="form-label">Timeout (seconds)</label>
+                    <input asp-for="Function.ExecutionConfig.Timeout" type="number" class="form-control" 
+                           placeholder="30" min="1" />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCPI Configuration -->
+    <div id="scpiConfig" class="card mb-4" style="display:none;">
+        <div class="card-header">
+            <i class="bi bi-terminal"></i> SCPI Command Configuration
+        </div>
+        <div class="card-body">
+            <div class="mb-3">
+                <label asp-for="Function.ExecutionConfig.ScpiCommand" class="form-label">SCPI Command *</label>
+                <input asp-for="Function.ExecutionConfig.ScpiCommand" class="form-control font-monospace"
+                       placeholder="MEAS:VOLT? {channel}" />
+                <small class="text-muted">Use {paramName} for parameters</small>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Function.ExecutionConfig.ConnectionString" class="form-label">Connection String *</label>
+                <input asp-for="Function.ExecutionConfig.ConnectionString" class="form-control"
+                       placeholder="TCPIP::192.168.1.100::5025::SOCKET" />
+                <small class="text-muted">Format: TCPIP::host::port::SOCKET or GPIB0::address::INSTR</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- SSH Configuration -->
+    <div id="sshConfig" class="card mb-4" style="display:none;">
+        <div class="card-header">
+            <i class="bi bi-hdd-network"></i> SSH Configuration
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-8 mb-3">
+                    <label asp-for="Function.ExecutionConfig.SshHost" class="form-label">Host/IP Address *</label>
+                    <input asp-for="Function.ExecutionConfig.SshHost" class="form-control"
+                           placeholder="192.168.1.100 or hostname.example.com" />
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label asp-for="Function.ExecutionConfig.SshPort" class="form-label">Port</label>
+                    <input asp-for="Function.ExecutionConfig.SshPort" type="number" class="form-control"
+                           placeholder="22" value="22" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label asp-for="Function.ExecutionConfig.SshUsername" class="form-label">Username *</label>
+                    <input asp-for="Function.ExecutionConfig.SshUsername" class="form-control"
+                           placeholder="admin" />
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label asp-for="Function.ExecutionConfig.SshPassword" class="form-label">Password</label>
+                    <input asp-for="Function.ExecutionConfig.SshPassword" type="password" class="form-control"
+                           placeholder="Leave empty if using SSH key" />
+                </div>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Function.ExecutionConfig.SshKeyPath" class="form-label">SSH Key Path</label>
+                <input asp-for="Function.ExecutionConfig.SshKeyPath" class="form-control"
+                       placeholder="C:\\keys\\id_rsa or /home/user/.ssh/id_rsa" />
+                <small class="text-muted">Path to private key file (alternative to password)</small>
+            </div>
+            <div id="sshFileFields" style="display:none;">
+                <hr />
+                <h6><i class="bi bi-file-earmark"></i> File Transfer Settings</h6>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Function.ExecutionConfig.RemotePath" class="form-label">Remote Path</label>
+                        <input asp-for="Function.ExecutionConfig.RemotePath" class="form-control"
+                               placeholder="/tmp/file.txt" />
+                        <small class="text-muted">Remote file path on SSH server</small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Function.ExecutionConfig.LocalPath" class="form-label">Local Path</label>
+                        <input asp-for="Function.ExecutionConfig.LocalPath" class="form-control"
+                               placeholder="C:\\data\\file.txt" />
+                        <small class="text-muted">Local file path (can be overridden at runtime)</small>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Function.ExecutionConfig.MaxFileSizeMb" class="form-label">Max File Size (MB)</label>
+                    <input asp-for="Function.ExecutionConfig.MaxFileSizeMb" type="number" class="form-control"
+                           placeholder="100" value="100" />
+                </div>
+            </div>
+            <div id="sshCommandField">
+                <hr />
+                <div class="mb-3">
+                    <label class="form-label">SSH Command (for READ/WRITE operations)</label>
+                    <textarea class="form-control font-monospace" rows="2" 
+                              placeholder="ls -la /tmp or cat /etc/hostname"></textarea>
+                    <small class="text-muted">Command to execute on remote server</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SDK Method Configuration -->
+    <div id="sdkConfig" class="card mb-4" style="display:none;">
+        <div class="card-header">
+            <i class="bi bi-code-slash"></i> SDK Method Configuration
+        </div>
+        <div class="card-body">
+            <div class="mb-3">
+                <label asp-for="Function.ExecutionConfig.AssemblyName" class="form-label">Assembly Name *</label>
+                <input asp-for="Function.ExecutionConfig.AssemblyName" class="form-control"
+                       placeholder="System.Private.CoreLib" />
+                <small class="text-muted">Name of the .NET assembly</small>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Function.ExecutionConfig.ClassName" class="form-label">Class Name *</label>
+                <input asp-for="Function.ExecutionConfig.ClassName" class="form-control"
+                       placeholder="System.Math" />
+                <small class="text-muted">Fully qualified class name</small>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Function.ExecutionConfig.MethodName" class="form-label">Method Name *</label>
+                <input asp-for="Function.ExecutionConfig.MethodName" class="form-control"
+                       placeholder="Max" />
+                <small class="text-muted">Name of the method to invoke</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Parameters -->
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span><i class="bi bi-sliders"></i> Parameters</span>
+            <button type="button" class="btn btn-sm btn-light" onclick="addParameter()">
+                <i class="bi bi-plus"></i> Add Parameter
+            </button>
+        </div>
+        <div class="card-body">
+            <div id="parametersContainer">
+                <p class="text-muted">No parameters defined. Click "Add Parameter" to add one.</p>
+            </div>
+            <input type="hidden" asp-for="ParametersJson" id="parametersJson" />
+        </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="d-flex justify-content-between">
+        <a asp-page="Index" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Cancel
+        </a>
+        <button type="submit" class="btn btn-primary btn-lg">
+            <i class="bi bi-save"></i> Create Function
+        </button>
+    </div>
+</form>
+
+@section Scripts {
+    <script>
+        let parameters = [];
+        let selectedOperationType = 'READ';
+        
+        // Execution type selection
+        document.querySelectorAll('.execution-type-card').forEach(card => {
+            card.addEventListener('click', function() {
+                document.querySelectorAll('.execution-type-card').forEach(c => c.classList.remove('selected'));
+                this.classList.add('selected');
+                this.querySelector('input[type="radio"]').checked = true;
+                
+                const type = this.dataset.type;
+                document.getElementById('restApiConfig').style.display = type === 'RestApi' ? 'block' : 'none';
+                document.getElementById('scpiConfig').style.display = type === 'ScpiCommand' ? 'block' : 'none';
+                document.getElementById('sshConfig').style.display = type === 'Ssh' ? 'block' : 'none';
+                document.getElementById('sdkConfig').style.display = type === 'SdkMethod' ? 'block' : 'none';
+                
+                updateFileFields();
+            });
+        });
+        
+        // Operation type selection
+        document.querySelectorAll('.operation-type-card').forEach(card => {
+            card.addEventListener('click', function() {
+                document.querySelectorAll('.operation-type-card').forEach(c => c.classList.remove('selected'));
+                this.classList.add('selected');
+                this.querySelector('input[type="radio"]').checked = true;
+                
+                selectedOperationType = this.dataset.op;
+                updateFileFields();
+            });
+        });
+        
+        // Initialize first operation type as selected
+        document.querySelector('.operation-type-card[data-op="READ"]').classList.add('selected');
+        
+        // Update file-related fields visibility
+        function updateFileFields() {
+            const isFileOp = selectedOperationType === 'FILE_UPLOAD' || selectedOperationType === 'FILE_DOWNLOAD';
+            const sshFileFields = document.getElementById('sshFileFields');
+            const sshCommandField = document.getElementById('sshCommandField');
+            
+            if (sshFileFields) {
+                sshFileFields.style.display = isFileOp ? 'block' : 'none';
+            }
+            if (sshCommandField) {
+                sshCommandField.style.display = isFileOp ? 'none' : 'block';
+            }
+        }
+        
+        // Parameter management
+        function addParameter() {
+            const param = {
+                name: '',
+                type: 'string',
+                required: true,
+                description: ''
+            };
+            parameters.push(param);
+            renderParameters();
+        }
+        
+        function removeParameter(index) {
+            parameters.splice(index, 1);
+            renderParameters();
+        }
+        
+        function renderParameters() {
+            const container = document.getElementById('parametersContainer');
+            if (parameters.length === 0) {
+                container.innerHTML = '<p class="text-muted">No parameters defined. Click "Add Parameter" to add one.</p>';
+                return;
+            }
+            
+            container.innerHTML = parameters.map((param, index) => `
+                <div class="parameter-item card mb-2">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <input type="text" class="form-control form-control-sm" placeholder="Parameter name"
+                                       value="${param.name}" onchange="updateParameter(${index}, 'name', this.value)" />
+                            </div>
+                            <div class="col-md-2">
+                                <select class="form-select form-select-sm" onchange="updateParameter(${index}, 'type', this.value)">
+                                    <option value="string" ${param.type === 'string' ? 'selected' : ''}>String</option>
+                                    <option value="int" ${param.type === 'int' ? 'selected' : ''}>Integer</option>
+                                    <option value="double" ${param.type === 'double' ? 'selected' : ''}>Double</option>
+                                    <option value="bool" ${param.type === 'bool' ? 'selected' : ''}>Boolean</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <input type="text" class="form-control form-control-sm" placeholder="Description"
+                                       value="${param.description || ''}" onchange="updateParameter(${index}, 'description', this.value)" />
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" ${param.required ? 'checked' : ''}
+                                           onchange="updateParameter(${index}, 'required', this.checked)" />
+                                    <label class="form-check-label">Required</label>
+                                </div>
+                            </div>
+                            <div class="col-md-1 text-end">
+                                <button type="button" class="btn btn-sm btn-danger" onclick="removeParameter(${index})">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            
+            document.getElementById('parametersJson').value = JSON.stringify(parameters);
+        }
+        
+        function updateParameter(index, field, value) {
+            parameters[index][field] = value;
+            document.getElementById('parametersJson').value = JSON.stringify(parameters);
+        }
+        
+        // Form submission
+        document.querySelector('form').addEventListener('submit', function(e) {
+            // Convert headers JSON to object
+            const headersText = document.getElementById('restHeaders')?.value;
+            if (headersText && headersText.trim()) {
+                try {
+                    document.getElementById('restHeadersHidden').value = headersText;
+                } catch (ex) {
+                    // Invalid JSON, will be handled server-side
+                }
+            }
+        });
+    </script>
+}

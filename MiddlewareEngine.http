@@ -1,0 +1,161 @@
+@MiddlewareEngine_HostAddress = https://localhost:5001
+@baseUrl = {{MiddlewareEngine_HostAddress}}
+
+### Seed database with sample functions
+POST {{baseUrl}}/api/seed
+Accept: application/json
+
+###
+
+### Get function count
+GET {{baseUrl}}/api/seed/count
+Accept: application/json
+
+###
+
+### Get all functions
+GET {{baseUrl}}/api/functions
+Accept: application/json
+
+###
+
+### Get active functions only
+GET {{baseUrl}}/api/functions/active
+Accept: application/json
+
+###
+
+### Create REST API function
+POST {{baseUrl}}/api/functions
+Content-Type: application/json
+
+{
+  "function_id": "get-weather",
+  "name": "Get Weather Data",
+  "description": "Fetches weather data from external API",
+  "execution_type": "RestApi",
+  "execution_config": {
+    "url": "https://api.openweathermap.org/data/2.5/weather",
+    "http_method": "GET",
+    "headers": {
+      "Accept": "application/json"
+    },
+    "timeout": 30
+  },
+  "parameters": [
+    {
+      "name": "city",
+      "type": "string",
+      "required": true,
+      "description": "City name"
+    },
+    {
+      "name": "appid",
+      "type": "string",
+      "required": true,
+      "description": "API key"
+    }
+  ],
+  "is_active": true
+}
+
+###
+
+### Create SDK Method function
+POST {{baseUrl}}/api/functions
+Content-Type: application/json
+
+{
+  "function_id": "calculate-max",
+  "name": "Calculate Max",
+  "description": "Returns maximum of two numbers using Math.Max",
+  "execution_type": "SdkMethod",
+  "execution_config": {
+    "assembly_name": "System.Private.CoreLib",
+    "class_name": "System.Math",
+    "method_name": "Max"
+  },
+  "parameters": [
+    {
+      "name": "val1",
+      "type": "double",
+      "required": true,
+      "description": "First value"
+    },
+    {
+      "name": "val2",
+      "type": "double",
+      "required": true,
+      "description": "Second value"
+    }
+  ],
+  "is_active": true
+}
+
+###
+
+### Execute function
+POST {{baseUrl}}/api/execute
+Content-Type: application/json
+
+{
+  "function_id": "calculate-max",
+  "parameters": {
+    "val1": 10,
+    "val2": 20
+  }
+}
+
+###
+
+### Execute SDK function - Math.Max (from seed data)
+POST {{baseUrl}}/api/execute
+Content-Type: application/json
+
+{
+  "function_id": "math-max",
+  "parameters": {
+    "val1": 45.5,
+    "val2": 33.2
+  }
+}
+
+###
+
+### Execute SDK function - Math.Round
+POST {{baseUrl}}/api/execute
+Content-Type: application/json
+
+{
+  "function_id": "math-round",
+  "parameters": {
+    "d": 3.14159,
+    "digits": 2
+  }
+}
+
+###
+
+### Execute SDK function - String.Concat
+POST {{baseUrl}}/api/execute
+Content-Type: application/json
+
+{
+  "function_id": "string-concat",
+  "parameters": {
+    "str0": "Hello, ",
+    "str1": "World!"
+  }
+}
+
+###
+
+### Execute REST API function - Get Random User
+POST {{baseUrl}}/api/execute
+Content-Type: application/json
+
+{
+  "function_id": "get-user-info"
+}
+
+###

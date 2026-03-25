@@ -1,0 +1,8 @@
+### Seed Test Cases
+POST http://localhost:5277/api/seed/testcases
+Content-Type: application/json
+
+###
+
+### Check Test Cases
+GET http://localhost:5277/api/testcases

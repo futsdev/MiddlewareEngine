@@ -1,0 +1,325 @@
+@page
+@model MiddlewareEngine.Pages.Setups.CreateModel
+@{
+    ViewData["Title"] = "Create Setup";
+}
+
+<nav aria-label="breadcrumb" style="margin-bottom:1rem;">
+    <ol class="breadcrumb" style="background:#f8fafc;padding:0.75rem 1rem;border-radius:8px;margin:0;">
+        <li class="breadcrumb-item"><a href="/" style="color:#3b82f6;text-decoration:none;"><i class="bi bi-house-door"></i> Home</a></li>
+        <li class="breadcrumb-item"><a href="/Setups" style="color:#3b82f6;text-decoration:none;">Setups</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Create</li>
+    </ol>
+</nav>
+
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+    }
+    .form-container {
+        max-width: 100%;
+        margin: 0;
+        background: white;
+        padding: 2rem;
+    }
+    .page-header {
+        background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+        color: white;
+        padding: 1rem 1.25rem;
+        border-radius: 8px;
+        margin-bottom: 2rem;
+    }
+    .page-header h1 {
+        margin: 0;
+        font-size: 1.5rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.25rem;
+        margin-bottom: 1.25rem;
+    }
+    .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+    .form-group.full-width {
+        grid-column: 1 / -1;
+    }
+    .form-group label {
+        font-weight: 600;
+        color: #0f172a;
+        margin-bottom: 0.5rem;
+        font-size: 0.875rem;
+    }
+    .form-group input,
+    .form-group select {
+        padding: 0.625rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        font-size: 0.875rem;
+    }
+    .btn {
+        padding: 0.625rem 1.25rem;
+        border: none;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 0.875rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .btn-primary {
+        background: #8b5cf6;
+        color: white;
+    }
+    .btn-primary:hover {
+        background: #7c3aed;
+    }
+    .btn-secondary {
+        background: #64748b;
+        color: white;
+    }
+    .btn-secondary:hover {
+        background: #475569;
+    }
+    .form-actions {
+        display: flex;
+        gap: 0.75rem;
+        justify-content: flex-end;
+        padding-top: 1.5rem;
+        border-top: 1px solid #e2e8f0;
+    }
+    .alert {
+        padding: 0.875rem;
+        border-radius: 6px;
+        margin-bottom: 1rem;
+        display: none;
+    }
+    .alert-success {
+        background: #d1fae5;
+        color: #065f46;
+        border: 1px solid #10b981;
+    }
+    .alert-error {
+        background: #fee2e2;
+        color: #991b1b;
+        border: 1px solid #ef4444;
+    }
+</style>
+
+<div class="form-container">
+    <div class="page-header">
+        <h1><i class="bi bi-diagram-3-fill"></i> Create New Setup</h1>
+    </div>
+
+    <div id="alert" class="alert"></div>
+
+    <form id="setupForm">
+        <div class="form-grid">
+            <div class="form-group full-width">
+                <label for="name"><i class="bi bi-tag"></i> Setup Name *</label>
+                <input type="text" id="name" name="name" required placeholder="Enter setup name" />
+            </div>
+
+            <div class="form-group">
+                <label for="type"><i class="bi bi-diagram-2"></i> Type *</label>
+                <select id="type" name="type" required>
+                    <option value="">Select Type</option>
+                    <option value="Production">Production</option>
+                    <option value="Testing">Testing</option>
+                    <option value="Development">Development</option>
+                    <option value="Research">Research</option>
+                    <option value="Calibration">Calibration</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="status"><i class="bi bi-circle"></i> Status</label>
+                <select id="status" name="status">
+                    <option value="Active">Active</option>
+                    <option value="Inactive">Inactive</option>
+                    <option value="Maintenance">Maintenance</option>
+                </select>
+            </div>
+
+            <div class="form-group full-width">
+                <label for="location"><i class="bi bi-geo-alt"></i> Location</label>
+                <input type="text" id="location" name="location" placeholder="Setup location" />
+            </div>
+
+            <div class="form-group full-width">
+                <label for="tags"><i class="bi bi-tags"></i> Tags (comma-separated)</label>
+                <input type="text" id="tags" name="tags" placeholder="e.g., automated, high-precision, lab-1" />
+            </div>
+
+            <div class="form-group full-width" style="border-top: 2px solid #e2e8f0; padding-top: 1.5rem; margin-top: 1rem;">
+                <h3 style="font-size: 1rem; color: #0f172a; margin-bottom: 1rem;">
+                    <i class="bi bi-hdd-rack"></i> Assign Instruments to Setup
+                </h3>
+            </div>
+
+            <div class="form-group full-width">
+                <label for="instrumentIds"><i class="bi bi-hdd-rack"></i> Select Available Instruments</label>
+                <select id="instrumentIds" name="instrumentIds" multiple style="min-height: 150px;" onchange="showInstrumentAssignments()">
+                    <option value="" disabled>Loading instruments...</option>
+                </select>
+                <small style="color: #64748b; font-size: 0.75rem;">Hold Ctrl (Cmd on Mac) to select multiple instruments. Only "Available" instruments are shown.</small>
+                <div id="instrumentAssignmentInfo" style="margin-top: 0.75rem;"></div>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button type="button" class="btn btn-secondary" onclick="window.location.href='/Setups/Index'">
+                <i class="bi bi-x-circle"></i> Cancel
+            </button>
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-check-circle"></i> Create Setup
+            </button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+<script>
+    let availableInstruments = [];
+    let allInstruments = [];
+    let allSetups = [];
+
+    document.addEventListener('DOMContentLoaded', async function() {
+        await loadAvailableInstruments();
+    });
+
+    async function loadAvailableInstruments() {
+        try {
+            const [instrumentsRes, setupsRes] = await Promise.all([
+                fetch('/api/instruments'),
+                fetch('/api/setups')
+            ]);
+            
+            if (instrumentsRes.ok) {
+                allInstruments = await instrumentsRes.ok ? await instrumentsRes.json() : [];
+                allSetups = setupsRes.ok ? await setupsRes.json() : [];
+                
+                // Filter only available instruments
+                availableInstruments = allInstruments.filter(inst => inst.status === 'Available');
+                
+                const instrumentSelect = document.getElementById('instrumentIds');
+                instrumentSelect.innerHTML = availableInstruments.length ? 
+                    availableInstruments.map(inst => '<option value="' + inst.id + '">' + inst.name + ' - ' + (inst.type || 'Instrument') + ' (' + (inst.manufacturer || 'N/A') + ')</option>').join('') :
+                    '<option value="" disabled>No available instruments</option>';
+            }
+        } catch (error) {
+            console.error('Error loading instruments:', error);
+        }
+    }
+
+    function showInstrumentAssignments() {
+        const instrumentSelect = document.getElementById('instrumentIds');
+        const selectedIds = Array.from(instrumentSelect.selectedOptions).map(opt => opt.value);
+        const infoDiv = document.getElementById('instrumentAssignmentInfo');
+        
+        if (!selectedIds.length) {
+            infoDiv.innerHTML = '';
+            return;
+        }
+
+        let warnings = [];
+        selectedIds.forEach(instId => {
+            const instrument = allInstruments.find(i => i.id === instId);
+            if (instrument) {
+                const assignedSetups = allSetups.filter(s => (s.instrumentIds || []).includes(instId));
+                if (assignedSetups.length > 0) {
+                    let details = '<div style="background:#fef3c7;border:1px solid #f59e0b;padding:0.75rem;border-radius:6px;margin-bottom:0.75rem;">';
+                    details += '<div style="font-weight:600;color:#92400e;margin-bottom:0.5rem;"><i class="bi bi-exclamation-triangle"></i> ' + instrument.name + ' is already assigned:</div>';
+                    
+                    assignedSetups.forEach(setup => {
+                        details += '<div style="margin-left:1rem;margin-bottom:0.5rem;">';
+                        details += '<div style="font-size:0.85rem;color:#92400e;"><i class="bi bi-diagram-3"></i> Setup: <strong>' + setup.name + '</strong> (' + (setup.type || 'N/A') + ')</div>';
+                        
+                        // Load projects data
+                        fetch('/api/projects').then(r => r.json()).then(projects => {
+                            const assignedProjects = projects.filter(p => (p.setupIds || []).includes(setup.id));
+                            if (assignedProjects.length > 0) {
+                                let projectInfo = '<div style="margin-left:1.5rem;margin-top:0.25rem;">';
+                                assignedProjects.forEach(proj => {
+                                    projectInfo += '<div style="font-size:0.8rem;color:#78350f;"><i class="bi bi-folder"></i> → Project: <strong>' + proj.name + '</strong>';
+                                    if (proj.startDate && proj.endDate) {
+                                        const start = new Date(proj.startDate).toLocaleDateString();
+                                        const end = new Date(proj.endDate).toLocaleDateString();
+                                        projectInfo += ' (' + start + ' - ' + end + ')';
+                                    }
+                                    projectInfo += '</div>';
+                                });
+                                projectInfo += '</div>';
+                                document.getElementById('instrumentAssignmentInfo').querySelector('[data-inst="' + instId + '"]').innerHTML += projectInfo;
+                            }
+                        });
+                        
+                        details += '</div>';
+                    });
+                    
+                    details += '</div>';
+                    warnings.push(details);
+                }
+            }
+        });
+
+        infoDiv.innerHTML = warnings.length > 0 ? warnings.join('') : 
+            '<div style="background:#d1fae5;border:1px solid #10b981;padding:0.75rem;border-radius:6px;">' +
+            '<div style="color:#065f46;font-weight:600;"><i class="bi bi-check-circle"></i> Selected instruments are available</div>' +
+            '<div style="color:#047857;font-size:0.85rem;margin-top:0.25rem;">These instruments have no existing assignments</div>' +
+            '</div>';
+    }
+
+    document.getElementById('setupForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const instrumentSelect = document.getElementById('instrumentIds');
+        const selectedInstruments = Array.from(instrumentSelect.selectedOptions).map(opt => opt.value);
+
+        const formData = {
+            name: document.getElementById('name').value,
+            type: document.getElementById('type').value,
+            status: document.getElementById('status').value,
+            location: document.getElementById('location').value,
+            tags: document.getElementById('tags').value.split(',').map(t => t.trim()).filter(t => t),
+            instrumentIds: selectedInstruments,
+            projectIds: [],
+            configuration: {}
+        };
+
+        try {
+            const response = await fetch('/api/setups', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            });
+
+            if (response.ok) {
+                showToast('Setup created successfully!', 'success');
+                setTimeout(() => window.location.href = '/Setups/Index', 1500);
+            } else {
+                const error = await response.text();
+                showToast('Failed to create setup: ' + error, 'error');
+            }
+        } catch (error) {
+            showToast('Error: ' + error.message, 'error');
+        }
+    });
+
+    function showAlert(message, type) {
+        const alert = document.getElementById('alert');
+        alert.textContent = message;
+        alert.className = `alert alert-${type}`;
+        alert.style.display = 'block';
+    }
+</script>
+}

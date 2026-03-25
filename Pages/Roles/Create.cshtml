@@ -1,0 +1,280 @@
+@page
+@model MiddlewareEngine.Pages.Roles.CreateModel
+@{
+    ViewData["Title"] = "Create Role";
+}
+
+<style>
+    .form-container {
+        max-width: 100%;
+        margin: 0;
+    }
+    
+    .form-card {
+        background: white;
+        border-radius: 10px;
+        padding: 2rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+    
+    .form-header {
+        background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+        color: white;
+        padding: 1.25rem;
+        border-radius: 10px;
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-group {
+        margin-bottom: 1.25rem;
+    }
+    
+    .form-label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        font-size: 0.875rem;
+        color: #0f172a;
+    }
+    
+    .form-control-custom {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        font-size: 0.875rem;
+    }
+    
+    .form-control-custom:focus {
+        outline: none;
+        border-color: #06b6d4;
+        box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.1);
+    }
+    
+    .permissions-section {
+        background: #f8fafc;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-top: 1rem;
+    }
+    
+    .permission-category {
+        margin-bottom: 1.5rem;
+    }
+    
+    .category-title {
+        font-weight: 700;
+        font-size: 0.9375rem;
+        color: #0f172a;
+        margin-bottom: 0.75rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid #e5e7eb;
+    }
+    
+    .permission-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 0.75rem;
+    }
+    
+    .checkbox-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.875rem;
+    }
+    
+    .checkbox-item input[type="checkbox"] {
+        width: 16px;
+        height: 16px;
+        cursor: pointer;
+    }
+    
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+</style>
+
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/Dashboard">Home</a></li>
+        <li class="breadcrumb-item"><a href="/Roles">Roles</a></li>
+        <li class="breadcrumb-item active">Create</li>
+    </ol>
+</nav>
+
+<div class="form-container">
+    <div class="form-header">
+        <h1 style="margin: 0; font-size: 1.5rem; font-weight: 700;"><i class="bi bi-shield-plus"></i> Create New Role</h1>
+        <p style="margin: 0.25rem 0 0 0; opacity: 0.9; font-size: 0.875rem;">Define a new role with specific permissions</p>
+    </div>
+    
+    <div class="form-card">
+        <form id="createRoleForm">
+            <div class="form-group">
+                <label class="form-label">Role Name *</label>
+                <input type="text" id="name" class="form-control-custom" required placeholder="e.g., Test Engineer, Administrator">
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Description</label>
+                <textarea id="description" class="form-control-custom" rows="3" placeholder="Describe the purpose of this role"></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Permissions</label>
+                <div class="permissions-section">
+                    <div class="permission-category">
+                        <div class="category-title">Functions</div>
+                        <div class="permission-grid">
+                            <label class="checkbox-item">
+                                <input type="checkbox" value="Functions.Create">
+                                Create
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" value="Functions.Read">
+                                Read
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" value="Functions.Update">
+                                Update
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" value="Functions.Delete">
+                                Delete
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" value="Functions.Execute">
+                                Execute
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="permission-category">
+                        <div class="category-title">Projects</div>
+                        <div class="permission-grid">
+                            <label class="checkbox-item">
+                                <input type="checkbox" value="Projects.Create">
+                                Create
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" value="Projects.Read">
+                                Read
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" value="Projects.Update">
+                                Update
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" value="Projects.Delete">
+                                Delete
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" value="Projects.Execute">
+                                Execute
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="permission-category">
+                        <div class="category-title">Setups</div>
+                        <div class="permission-grid">
+                            <label class="checkbox-item">
+                                <input type="checkbox" value="Setups.Create">
+                                Create
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" value="Setups.Read">
+                                Read
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" value="Setups.Update">
+                                Update
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" value="Setups.Delete">
+                                Delete
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" value="Setups.Execute">
+                                Execute
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="permission-category">
+                        <div class="category-title">Instruments</div>
+                        <div class="permission-grid">
+                            <label class="checkbox-item">
+                                <input type="checkbox" value="Instruments.Create">
+                                Create
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" value="Instruments.Read">
+                                Read
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" value="Instruments.Update">
+                                Update
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" value="Instruments.Delete">
+                                Delete
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" value="Instruments.Execute">
+                                Execute
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary" style="background: #06b6d4; border-color: #06b6d4;"><i class="bi bi-check-circle"></i> Create Role</button>
+                <a href="/Roles" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('createRoleForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            await createRole();
+        });
+    });
+    
+    async function createRole() {
+        const selectedPermissions = Array.from(document.querySelectorAll('input[type="checkbox"]:checked'))
+            .map(function(cb) { return cb.value; });
+        
+        const role = {
+            name: document.getElementById('name').value,
+            description: document.getElementById('description').value,
+            permissions: selectedPermissions
+        };
+        
+        try {
+            const response = await fetch('/api/roles', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(role)
+            });
+            
+            if (response.ok) {
+                showToast('Role created successfully', 'success');
+                setTimeout(function() { window.location.href = '/Roles'; }, 1000);
+            } else {
+                const errorText = await response.text();
+                showToast('Failed to create role: ' + errorText, 'error');
+            }
+        } catch (error) {
+            console.error('Error creating role:', error);
+            showToast('Error creating role', 'error');
+        }
+    }
+</script>

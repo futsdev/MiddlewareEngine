@@ -1,0 +1,626 @@
+@page
+@model MiddlewareEngine.Pages.Instruments.IndexModel
+@{
+    ViewData["Title"] = "Instruments Management";
+}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+<nav aria-label="breadcrumb" style="margin-bottom:1rem;">
+    <ol class="breadcrumb" style="background:#f8fafc;padding:0.75rem 1rem;border-radius:8px;margin:0;">
+        <li class="breadcrumb-item"><a href="/" style="color:#3b82f6;text-decoration:none;"><i class="bi bi-house-door"></i> Home</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Instruments</li>
+    </ol>
+</nav>
+
+<style>
+    :root {
+        --primary: #3b82f6;
+        --success: #10b981;
+        --warning: #f59e0b;
+        --danger: #ef4444;
+        --info: #06b6d4;
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, var(--info), #0891b2);
+        color: white;
+        padding: 1rem 1.25rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .page-header h1 {
+        margin: 0;
+        font-size: 1.25rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .filters-card {
+        background: white;
+        padding: 1rem;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        margin-bottom: 1rem;
+        border: 1px solid #e2e8f0;
+    }
+
+    .filters-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 0.75rem;
+    }
+
+    .filter-group label {
+        font-weight: 600;
+        color: #0f172a;
+        margin-bottom: 0.375rem;
+        font-size: 0.75rem;
+        display: block;
+    }
+
+    .filter-group input,
+    .filter-group select {
+        width: 100%;
+        padding: 0.5rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        font-size: 0.8125rem;
+    }
+
+    .instruments-grid {
+        display: grid;
+        gap: 0.75rem;
+    }
+
+    .instrument-card {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        border: 1px solid #e2e8f0;
+        border-left: 3px solid var(--info);
+        transition: all 0.2s;
+    }
+
+    .instrument-card:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        transform: translateY(-1px);
+    }
+
+    .card-header {
+        padding: 0.875rem 1rem;
+        border-bottom: 1px solid #e2e8f0;
+        background: #fafafa;
+        display: flex;
+        justify-content: space-between;
+        align-items: start;
+    }
+
+    .card-title h3 {
+        margin: 0 0 0.25rem 0;
+        font-size: 0.9375rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 0.375rem;
+    }
+
+    .card-title .meta {
+        color: #64748b;
+        font-size: 0.8125rem;
+    }
+
+    .card-badges {
+        display: flex;
+        gap: 0.375rem;
+        flex-wrap: wrap;
+    }
+
+    .badge {
+        padding: 0.2rem 0.625rem;
+        border-radius: 10px;
+        font-size: 0.6875rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .badge-available {
+        background: #d1fae5;
+        color: #065f46;
+    }
+
+    .badge-in-use {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .badge-maintenance {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .badge-offline {
+        background: #e5e7eb;
+        color: #374151;
+    }
+
+    .card-body {
+        padding: 0.875rem 1rem;
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.625rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .info-item {
+        padding: 0.5rem;
+        background: #f8fafc;
+        border-radius: 6px;
+        font-size: 0.75rem;
+    }
+
+    .info-label {
+        color: #64748b;
+        font-weight: 600;
+        text-transform: uppercase;
+        margin-bottom: 0.25rem;
+    }
+
+    .info-value {
+        color: #0f172a;
+        font-weight: 500;
+    }
+
+    .resources-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.625rem;
+    }
+
+    .resource-box {
+        background: #eff6ff;
+        border: 1px solid #bfdbfe;
+        border-radius: 6px;
+        padding: 0.625rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .resource-box:hover {
+        background: #dbeafe;
+        border-color: var(--info);
+    }
+
+    .resource-box i {
+        font-size: 1.125rem;
+        color: var(--info);
+        margin-bottom: 0.25rem;
+    }
+
+    .resource-value {
+        font-size: 1.125rem;
+        font-weight: 700;
+        color: #0f172a;
+    }
+
+    .resource-label {
+        font-size: 0.6875rem;
+        color: #64748b;
+        text-transform: uppercase;
+    }
+
+    .card-footer {
+        padding: 0.625rem 1rem;
+        background: #fafafa;
+        border-top: 1px solid #e2e8f0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .btn {
+        padding: 0.375rem 0.75rem;
+        border: none;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 0.75rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .btn-primary {
+        background: white;
+        color: var(--primary);
+    }
+
+    .btn-success {
+        background: var(--success);
+        color: white;
+    }
+
+    .btn-warning {
+        background: var(--warning);
+        color: white;
+    }
+
+    .btn-danger {
+        background: var(--danger);
+        color: white;
+    }
+
+    .btn-info {
+        background: var(--info);
+        color: white;
+    }
+
+    .details-section {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease;
+    }
+
+    .details-section.expanded {
+        max-height: 2000px;
+        overflow: visible;
+    }
+
+    .relationships {
+        padding: 1rem;
+        background: white;
+        border-top: 1px solid #e2e8f0;
+    }
+
+    .relationship-grid {
+        display: grid;
+        gap: 0.75rem;
+    }
+
+    .relationship-item {
+        padding: 0.625rem;
+        background: #f8fafc;
+        border-left: 3px solid var(--primary);
+        border-radius: 4px;
+        font-size: 0.8125rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+</style>
+
+<div class="page-header">
+    <h1><i class="bi bi-hdd-rack"></i> Instruments Management</h1>
+    <a href="/Instruments/Create" class="btn btn-primary"><i class="bi bi-plus"></i> Add Instrument</a>
+</div>
+
+<div class="filters-card">
+    <div class="filters-grid">
+        <div class="filter-group">
+            <label><i class="bi bi-search"></i> Search</label>
+            <input type="text" id="searchFilter" placeholder="Search instruments..." onkeyup="applyFilters()" />
+        </div>
+        <div class="filter-group">
+            <label><i class="bi bi-diagram-2"></i> Type</label>
+            <select id="typeFilter" onchange="applyFilters()">
+                <option value="">All Types</option>
+                <option value="Oscilloscope">Oscilloscope</option>
+                <option value="Signal Generator">Signal Generator</option>
+                <option value="Power Supply">Power Supply</option>
+                <option value="Multimeter">Multimeter</option>
+                <option value="Spectrum Analyzer">Spectrum Analyzer</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label><i class="bi bi-circle"></i> Status</label>
+            <select id="statusFilter" onchange="applyFilters()">
+                <option value="">All Status</option>
+                <option value="Available">Available</option>
+                <option value="In Use">In Use</option>
+                <option value="Maintenance">Maintenance</option>
+                <option value="Offline">Offline</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label><i class="bi bi-plug"></i> Connection</label>
+            <select id="connectionFilter" onchange="applyFilters()">
+                <option value="">All Connections</option>
+                <option value="SCPI">SCPI</option>
+                <option value="REST">REST</option>
+                <option value="SDK">SDK</option>
+            </select>
+        </div>
+    </div>
+</div>
+
+<div id="instrumentsContainer" class="instruments-grid">
+    <div style="text-align: center; padding: 2rem; color: #64748b;">
+        <i class="fas fa-spinner fa-spin" style="font-size: 2rem;"></i>
+        <p>Loading instruments...</p>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    let allInstruments = [], filteredInstruments = [], allProjects = [], allSetups = [];
+    let currentPage = 1, pageSize = 10;
+
+    document.addEventListener('DOMContentLoaded', async function () {
+        await Promise.all([loadInstruments(), loadProjects(), loadSetups()]);
+        applyFilters();
+    });
+
+    async function loadInstruments() {
+        try {
+            const res = await fetch('/api/instruments');
+            if (res.ok) allInstruments = await res.json();
+        } catch (error) {
+            console.error('Error loading instruments:', error);
+        }
+    }
+
+    async function loadProjects() {
+        try {
+            const res = await fetch('/api/projects');
+            if (res.ok) allProjects = await res.json();
+        } catch (error) {
+            console.error('Error loading projects:', error);
+        }
+    }
+
+    async function loadSetups() {
+        try {
+            const res = await fetch('/api/setups');
+            if (res.ok) allSetups = await res.json();
+        } catch (error) {
+            console.error('Error loading setups:', error);
+        }
+    }
+
+    function applyFilters() {
+        const search = document.getElementById('searchFilter').value.toLowerCase();
+        const type = document.getElementById('typeFilter').value;
+        const status = document.getElementById('statusFilter').value;
+        const connection = document.getElementById('connectionFilter').value;
+
+        filteredInstruments = allInstruments.filter(inst => {
+            return (!search || (inst.name || '').toLowerCase().includes(search) || (inst.model || '').toLowerCase().includes(search)) &&
+                (!type || inst.type === type) &&
+                (!status || inst.status === status) &&
+                (!connection || inst.connectionType === connection);
+        });
+
+        currentPage = 1;
+        renderInstruments();
+    }
+
+    function getConnectionBadges(inst) {
+        if (!inst.connections || inst.connections.length === 0) {
+            return '<span style="padding:0.125rem 0.375rem;background:#e2e8f0;border-radius:4px;font-size:0.7rem;color:#475569;">' + (inst.connectionType || 'N/A') + '</span>';
+        }
+        
+        const connColors = {
+            'SCPI': '#06b6d4',
+            'REST': '#10b981',
+            'SSH': '#f59e0b',
+            'SDK': '#8b5cf6',
+            'VISA': '#ec4899'
+        };
+        
+        let badges = '<div style="display:flex;gap:0.25rem;flex-wrap:wrap;">';
+        inst.connections.forEach(conn => {
+            const color = connColors[conn.type] || '#64748b';
+            badges += '<span style="padding:0.125rem 0.375rem;background:' + color + ';color:white;border-radius:4px;font-size:0.7rem;font-weight:600;">' + conn.type + '</span>';
+        });
+        badges += '</div>';
+        return badges;
+    }
+
+    function renderInstruments() {
+        const container = document.getElementById('instrumentsContainer');
+        
+        if (!filteredInstruments.length) {
+            container.innerHTML = '<div style="text-align:center;padding:2rem;color:#64748b;"><i class="fas fa-inbox" style="font-size:3rem;margin-bottom:1rem;"></i><p>No instruments found</p></div>';
+            return;
+        }
+
+        const start = (currentPage - 1) * pageSize;
+        const paginated = filteredInstruments.slice(start, start + pageSize);
+
+        let html = '';
+        paginated.forEach(inst => {
+            const statusClass = 'badge-' + (inst.status || 'available').toLowerCase().replace(' ', '-');
+            
+            // Get setup names and their projects for this instrument
+            const assignedSetups = allSetups.filter(s => (s.instrumentIds || []).includes(inst.id));
+            const setupDetails = assignedSetups.map(setup => {
+                const setupProjects = allProjects.filter(p => (p.setupIds || []).includes(setup.id));
+                return {
+                    name: setup.name,
+                    type: setup.type,
+                    projects: setupProjects.map(p => ({ name: p.name, endDate: p.endDate }))
+                };
+            });
+            
+            // Calculate accurate counts
+            const setupCount = assignedSetups.length;
+            let projectCount = 0;
+            setupDetails.forEach(s => { projectCount += s.projects.length; });
+            
+            let mappingInfo = '';
+            if (setupDetails.length > 0) {
+                mappingInfo = '<div style="border-top:1px solid #e2e8f0;padding-top:0.75rem;margin-top:0.75rem;">';
+                mappingInfo += '<div style="font-size:0.75rem;font-weight:600;color:#475569;margin-bottom:0.5rem;"><i class="bi bi-diagram-2"></i> Assignment Chain:</div>';
+                setupDetails.forEach((setup, idx) => {
+                    if (idx < 2) {
+                        mappingInfo += '<div style="font-size:0.75rem;color:#64748b;margin-left:0.5rem;margin-bottom:0.5rem;">';
+                        mappingInfo += '<div><i class="bi bi-arrow-right"></i> Setup: <strong style="color:#3b82f6;">' + setup.name + '</strong></div>';
+                        if (setup.projects.length > 0) {
+                            setup.projects.forEach((proj, pidx) => {
+                                if (pidx < 1) {
+                                    mappingInfo += '<div style="margin-left:1rem;color:#10b981;"><i class="bi bi-arrow-right"></i> Project: ' + proj.name;
+                                    if (proj.endDate) {
+                                        const daysLeft = Math.ceil((new Date(proj.endDate) - new Date()) / (1000*60*60*24));
+                                        if (daysLeft > 0) mappingInfo += ' <span style="color:#10b981;">(' + daysLeft + 'd left)</span>';
+                                        else if (daysLeft < 0) mappingInfo += ' <span style="color:#ef4444;">(overdue)</span>';
+                                    }
+                                    mappingInfo += '</div>';
+                                }
+                            });
+                            if (setup.projects.length > 1) {
+                                mappingInfo += '<div style="margin-left:1rem;color:#94a3b8;font-size:0.7rem;">+' + (setup.projects.length - 1) + ' more project(s)</div>';
+                            }
+                        }
+                        mappingInfo += '</div>';
+                    }
+                });
+                if (setupDetails.length > 2) {
+                    mappingInfo += '<div style="font-size:0.7rem;color:#94a3b8;margin-left:0.5rem;">+' + (setupDetails.length - 2) + ' more setup(s)...</div>';
+                }
+                mappingInfo += '</div>';
+            }
+
+            html += '<div class="instrument-card">' +
+                    '<div class="card-header">' +
+                        '<div class="card-title">' +
+                            '<h3><i class="bi bi-hdd-rack"></i> ' + (inst.name || 'Unnamed Instrument') + '</h3>' +
+                            '<div class="meta">' + (inst.manufacturer || '') + ' ' + (inst.model || '') + '</div>' +
+                        '</div>' +
+                        '<div class="card-badges">' +
+                            '<span class="badge ' + statusClass + '">' + (inst.status || 'Available') + '</span>' +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="card-body">' +
+                        '<div class="info-grid">' +
+                            '<div class="info-item">' +
+                                '<div class="info-label">Type</div>' +
+                                '<div class="info-value">' + (inst.type || 'N/A') + '</div>' +
+                            '</div>' +
+                            '<div class="info-item">' +
+                                '<div class="info-label">Connections</div>' +
+                                '<div class="info-value">' + getConnectionBadges(inst) + '</div>' +
+                            '</div>' +
+                            '<div class="info-item">' +
+                                '<div class="info-label">Location</div>' +
+                                '<div class="info-value">' + (inst.location || 'N/A') + '</div>' +
+                            '</div>' +
+                            '<div class="info-item">' +
+                                '<div class="info-label">Serial Number</div>' +
+                                '<div class="info-value">' + (inst.serialNumber || 'N/A') + '</div>' +
+                            '</div>' +
+                        '</div>' +
+                        mappingInfo +
+                        '<div class="resources-grid" style="margin-top:0.75rem;">' +
+                            '<div class="resource-box">' +
+                                '<i class="bi bi-folder"></i>' +
+                                '<div class="resource-value">' + projectCount + '</div>' +
+                                '<div class="resource-label">Projects</div>' +
+                            '</div>' +
+                            '<div class="resource-box">' +
+                                '<i class="bi bi-diagram-3"></i>' +
+                                '<div class="resource-value">' + setupCount + '</div>' +
+                                '<div class="resource-label">Setups</div>' +
+                            '</div>' +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="details-section" id="details-' + inst.id + '"></div>' +
+                    '<div class="card-footer">' +
+                        '<div style="font-size:0.75rem;color:#64748b;">' +
+                            '<i class="bi bi-calendar"></i> ' + new Date(inst.createdAt).toLocaleDateString() +
+                        '</div>' +
+                        '<div style="display:flex;gap:0.375rem;">' +
+                            '<button class="btn btn-info" onclick="toggleDetails(\'' + inst.id + '\')"><i class="bi bi-eye"></i> View</button>' +
+                            '<button class="btn btn-success" onclick="editInstrument(\'' + inst.id + '\')"><i class="bi bi-pencil"></i> Edit</button>' +
+                            '<button class="btn btn-danger" onclick="deleteInstrument(\'' + inst.id + '\', \'' + (inst.name || '').replace(/'/g, "\\'") + '\')"><i class="bi bi-trash"></i> Delete</button>' +
+                        '</div>' +
+                    '</div>' +
+                '</div>';
+        });
+
+        container.innerHTML = html;
+    }
+
+    function toggleDetails(instrumentId) {
+        const details = document.getElementById('details-' + instrumentId);
+        if (details.classList.contains('expanded')) {
+            details.classList.remove('expanded');
+            details.innerHTML = '';
+        } else {
+            const inst = allInstruments.find(i => i.id === instrumentId);
+            if (!inst) return;
+
+            const setupsHTML = (inst.setupIds || []).map(sid => {
+                const setup = allSetups.find(s => s.id === sid);
+                if (!setup) return '';
+                
+                // Find projects that use this setup
+                const setupProjects = allProjects.filter(p => (p.setupIds || []).includes(sid));
+                let projectInfo = '';
+                if (setupProjects.length > 0) {
+                    projectInfo = '<div style="margin-left:1.5rem;margin-top:0.25rem;font-size:0.8rem;color:#64748b;">';
+                    setupProjects.forEach(proj => {
+                        projectInfo += '<div style="margin-bottom:0.25rem;"><i class="bi bi-arrow-right"></i> Used in Project: <strong>' + proj.name + '</strong>';
+                        if (proj.startDate || proj.endDate) {
+                            projectInfo += '<br><span style="margin-left:1.25rem;font-size:0.75rem;color:#94a3b8;">';
+                            if (proj.startDate) projectInfo += new Date(proj.startDate).toLocaleDateString();
+                            if (proj.endDate) projectInfo += ' → ' + new Date(proj.endDate).toLocaleDateString();
+                            projectInfo += '</span>';
+                        }
+                        projectInfo += '</div>';
+                    });
+                    projectInfo += '</div>';
+                }
+                
+                return '<div class="relationship-item" style="padding:0.75rem;"><i class="bi bi-diagram-3"></i> <strong>' + setup.name + '</strong> (' + (setup.type || 'Setup') + ')' + projectInfo + '</div>';
+            }).filter(x => x).join('');
+
+            let content = '<div class="relationships">';
+            
+            if (setupsHTML) {
+                content += '<h4 style="font-size:0.875rem;margin:0 0 0.5rem 0;font-weight:600;color:#0f172a;"><i class="bi bi-diagram-3"></i> Assigned to Setups (with Project Details)</h4><div class="relationship-grid">' + setupsHTML + '</div>';
+            } else {
+                content += '<div style="text-align:center;color:#64748b;font-size:0.8125rem;padding:1rem;background:#f8fafc;border-radius:6px;"><i class="bi bi-info-circle"></i> This instrument is not assigned to any setups or projects</div>';
+            }
+            
+            content += '</div>';
+            
+            details.innerHTML = content;
+            details.classList.add('expanded');
+        }
+    }
+
+    function editInstrument(id) {
+        window.location.href = '/Instruments/Edit?id=' + id;
+    }
+
+    async function deleteInstrument(id, name) {
+        if (!confirm('Delete instrument "' + name + '"?\n\nWarning: This will remove it from all projects and setups.')) return;
+        
+        try {
+            const res = await fetch('/api/instruments/' + id, { method: 'DELETE' });
+            if (res.ok) {
+                showToast('Instrument deleted successfully', 'success');
+                await loadInstruments();
+                applyFilters();
+            } else {
+                showToast('Failed to delete instrument', 'error');
+            }
+        } catch (error) {
+            console.error('Error deleting instrument:', error);
+            showToast('Error deleting instrument', 'error');
+        }
+    }
+</script>
+}

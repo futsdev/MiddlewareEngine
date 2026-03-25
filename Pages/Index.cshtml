@@ -1,0 +1,147 @@
+@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Function Definitions";
+}
+
+<nav aria-label="breadcrumb" style="margin-bottom:1.5rem;">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/Dashboard"><i class="bi bi-house-door"></i> Home</a></li>
+        <li class="breadcrumb-item active" aria-current="page"><i class="bi bi-list-ul"></i> Functions</li>
+    </ol>
+</nav>
+
+<div class="page-header">
+    <div class="d-flex justify-content-between align-items-center">
+        <h1><i class="bi bi-list-ul"></i> Function Definitions</h1>
+        <a asp-page="Create" class="btn btn-primary btn-lg">
+            <i class="bi bi-plus-circle"></i> Create New Function
+        </a>
+    </div>
+</div>
+
+@if (!Model.Functions.Any())
+{
+    <div class="alert alert-info">
+        <i class="bi bi-info-circle"></i> No functions defined yet. 
+        <a asp-page="Create" class="alert-link">Create your first function</a> or 
+        <a href="/api/seed" class="alert-link" onclick="return confirmSeed()">seed sample data</a>.
+    </div>
+}
+else
+{
+    <div class="row">
+        @foreach (var function in Model.Functions)
+        {
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span>@function.Name</span>
+                        <span class="badge @(function.ExecutionType switch {
+                            "RestApi" => "badge-rest",
+                            "ScpiCommand" => "badge-scpi",
+                            "SdkMethod" => "badge-sdk",
+                            _ => "bg-secondary"
+                        })">
+                            @function.ExecutionType
+                        </span>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted mb-2">
+                            <strong>Function ID:</strong> <code>@function.FunctionId</code>
+                        </p>
+                        @if (!string.IsNullOrEmpty(function.Description))
+                        {
+                            <p class="card-text">@function.Description</p>
+                        }
+                        
+                        <div class="mt-3">
+                            @if (function.ExecutionType == "RestApi")
+                            {
+                                <small class="d-block text-muted">
+                                    <i class="bi bi-link-45deg"></i> @function.ExecutionConfig.HttpMethod @function.ExecutionConfig.Url
+                                </small>
+                            }
+                            else if (function.ExecutionType == "ScpiCommand")
+                            {
+                                <small class="d-block text-muted">
+                                    <i class="bi bi-terminal"></i> @function.ExecutionConfig.ScpiCommand
+                                </small>
+                            }
+                            else if (function.ExecutionType == "SdkMethod")
+                            {
+                                <small class="d-block text-muted">
+                                    <i class="bi bi-code-slash"></i> @function.ExecutionConfig.ClassName.@function.ExecutionConfig.MethodName
+                                </small>
+                            }
+                            else
+                            {
+                                <small class="d-block text-muted">
+                                    <i class="bi bi-gear"></i> Custom execution type
+                                </small>
+                            }
+                        </div>
+                        
+                        @if (function.Parameters.Any())
+                        {
+                            <div class="mt-2">
+                                <small class="text-muted">
+                                    <i class="bi bi-sliders"></i> @function.Parameters.Count parameter(s)
+                                </small>
+                            </div>
+                        }
+                        
+                        <div class="mt-2">
+                            <span class="badge @(function.IsActive ? "bg-success" : "bg-secondary")">
+                                @(function.IsActive ? "Active" : "Inactive")
+                            </span>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-transparent">
+                        <div class="btn-group w-100" role="group">
+                            <a asp-page="Edit" asp-route-id="@function.Id" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-pencil"></i> Edit
+                            </a>
+                            <a asp-page="Execute" asp-route-functionId="@function.FunctionId" class="btn btn-sm btn-outline-success">
+                                <i class="bi bi-play"></i> Execute
+                            </a>
+                            <button type="button" class="btn btn-sm btn-outline-danger" 
+                                    onclick="deleteFunction('@function.Id', '@function.Name')">
+                                <i class="bi bi-trash"></i> Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@section Scripts {
+    <script>
+        function confirmSeed() {
+            return confirm('This will seed the database with sample functions. Continue?');
+        }
+        
+        async function deleteFunction(id, name) {
+            if (!confirm(`Are you sure you want to delete "${name}"?`)) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/functions/${id}`, {
+                    method: 'DELETE'
+                });
+                
+                if (response.ok) {
+                    showToast('Function deleted successfully', 'success');
+                    setTimeout(function() { location.reload(); }, 1000);
+                } else {
+                    showToast('Failed to delete function', 'error');
+                }
+            } catch (error) {
+                showToast('Error: ' + error.message, 'error');
+            }
+        }
+    </script>
+}
